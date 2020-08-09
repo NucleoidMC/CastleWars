@@ -7,11 +7,10 @@ import net.minecraft.block.Blocks;
 
 public class MapConfig {
 
-    public final BlockState floor;
-
     public static final Codec<MapConfig> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             BlockState.CODEC.optionalFieldOf("floor", Blocks.RED_TERRACOTTA.getDefaultState()).forGetter(config -> config.floor)
     ).apply(instance, MapConfig::new));
+    public final BlockState floor;
 
     public MapConfig(BlockState floor) {
         this.floor = floor;

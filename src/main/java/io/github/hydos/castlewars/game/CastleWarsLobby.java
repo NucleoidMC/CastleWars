@@ -1,5 +1,6 @@
 package io.github.hydos.castlewars.game;
 
+import io.github.hydos.castlewars.game.active.CastleWarsGame;
 import io.github.hydos.castlewars.game.config.CastleWarsConfig;
 import io.github.hydos.castlewars.game.map.CastleWarsMap;
 import io.github.hydos.castlewars.game.map.MapGenerator;
@@ -15,7 +16,6 @@ import net.gegy1000.plasmid.game.rule.GameRule;
 import net.gegy1000.plasmid.game.rule.RuleResult;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.world.GameMode;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -44,7 +44,7 @@ public class CastleWarsLobby {
             CastleWarsLobby waiting = new CastleWarsLobby(gameWorld, map, config);
 
             gameWorld.newGame(game -> {
-                game.setRule(GameRule.ALLOW_CRAFTING, RuleResult.DENY);
+                game.setRule(GameRule.ALLOW_CRAFTING, RuleResult.ALLOW);
                 game.setRule(GameRule.ALLOW_PORTALS, RuleResult.DENY);
                 game.setRule(GameRule.ALLOW_PVP, RuleResult.DENY);
                 game.setRule(GameRule.FALL_DAMAGE, RuleResult.DENY);
@@ -71,24 +71,26 @@ public class CastleWarsLobby {
         if (this.gameWorld.getPlayerCount() < this.config.players.getMinPlayers()) {
             return StartResult.notEnoughPlayers();
         }
-
         CastleWarsGame.open(this.gameWorld, this.map, this.config);
-
         return StartResult.ok();
     }
 
     private void addPlayer(ServerPlayerEntity player) {
-        this.spawnPlayer(player);
+        this.spawnPlayerToLobby(player);
     }
 
     private boolean onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
-        this.spawnPlayer(player);
+        this.playerDied(player);
         return true;
     }
 
-    private void spawnPlayer(ServerPlayerEntity player) {
-        this.playerManager.resetPlayer(player, GameMode.ADVENTURE);
-        this.playerManager.playerJoinGame(player);
+    private void playerDied(ServerPlayerEntity player) {
+        player.setHealth(20);
+        spawnPlayerToLobby(player);
+    }
+
+    private void spawnPlayerToLobby(ServerPlayerEntity player) {
+        this.playerManager.spawnPlayerInLobby(player);
     }
 
 }

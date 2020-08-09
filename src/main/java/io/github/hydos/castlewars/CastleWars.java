@@ -12,7 +12,6 @@ import org.apache.logging.log4j.Logger;
 public class CastleWars implements ModInitializer {
 
     public static final String ID = "castlewars";
-    public static final Logger LOGGER = LogManager.getLogger(ID);
 
     public static final GameType<CastleWarsConfig> TYPE = GameType.register(
             new Identifier(CastleWars.ID, "castlewars"),

@@ -2,19 +2,27 @@ package io.github.hydos.castlewars.game;
 
 import io.github.hydos.castlewars.game.map.CastleWarsMap;
 import net.gegy1000.plasmid.game.GameWorld;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.GameMode;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PlayerManager {
 
+    private static PlayerManager INSTANCE;
+    public List<ServerPlayerEntity> players = new ArrayList<>();
     GameWorld gameWorld;
     CastleWarsMap map;
 
     public PlayerManager(GameWorld gameWorld, CastleWarsMap map) {
+        INSTANCE = this;
         this.gameWorld = gameWorld;
         this.map = map;
+    }
+
+    public static PlayerManager getInstance() {
+        return INSTANCE;
     }
 
     public void resetPlayer(ServerPlayerEntity player, GameMode gamemode) {
@@ -22,10 +30,11 @@ public class PlayerManager {
         map.spawnPlayerIntoLobby(player, gameWorld.getWorld());
     }
 
-    public void playerJoinGame(ServerPlayerEntity player) {
-        player.inventory.clear();
-        player.inventory.main.add(0, new ItemStack(Blocks.RED_WOOL));
-        player.inventory.main.add(1, new ItemStack(Blocks.BLUE_WOOL));
+    public void spawnPlayerInLobby(ServerPlayerEntity player) {
+        players.add(player);
         resetPlayer(player, GameMode.ADVENTURE);
+    }
+
+    public void tick() {
     }
 }

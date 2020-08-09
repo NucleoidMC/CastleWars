@@ -2,7 +2,6 @@ package io.github.hydos.castlewars.game.map;
 
 import net.gegy1000.plasmid.game.map.template.MapTemplate;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
@@ -25,18 +24,19 @@ public class MapGenerator {
         MapTemplate template = MapTemplate.createEmpty();
         CastleWarsMap map = new CastleWarsMap(template, this.config);
 
-        this.createTeamPlatform(template, 0, 60, 0, Blocks.BLUE_TERRACOTTA, 10);
-        this.createTeamPlatform(template, 40, 60, 0, Blocks.RED_TERRACOTTA, 10);
+        this.createTeamPlatform(template, 0, 80, Blocks.BLUE_TERRACOTTA, 10);
+        this.createTeamPlatform(template, 40, 80, Blocks.RED_TERRACOTTA, 10);
+        this.createTeamPlatform(template, 40, 200, Blocks.GLASS, 20);
 
-        map.setSpawn(new BlockPos(0, 62, 0));
+        map.setSpawn(new BlockPos(50, 201, 0));
 
         return map;
     }
 
-    private void createTeamPlatform(MapTemplate template, int xPlatformOffset, int y, int zPlatformOffset, Block block, int width) {
+    private void createTeamPlatform(MapTemplate template, int xPlatformOffset, int y, Block block, int width) {
         BlockPos.Mutable mutablePos = new BlockPos.Mutable();
         for (int x = xPlatformOffset; x < width + xPlatformOffset; x++) {
-            for (int z = zPlatformOffset; z < width + zPlatformOffset; z++) {
+            for (int z = 0; z < width; z++) {
                 mutablePos.set(x, y, z);
                 template.setBlockState(mutablePos, block.getDefaultState());
             }
