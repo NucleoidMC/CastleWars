@@ -14,7 +14,7 @@
 
   "environment": "*",
   "entrypoints": {
-    "main": [
+    "server": [
       "io.github.hydos.castlewars.CastleWars"
     ]
   },

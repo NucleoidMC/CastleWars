@@ -11,7 +11,7 @@ import java.util.List;
 public class PlayerManager {
 
     private static PlayerManager INSTANCE;
-    public List<ServerPlayerEntity> players = new ArrayList<>();
+    public List<ServerPlayerEntity> gamePlayers = new ArrayList<>();
     GameWorld gameWorld;
     CastleWarsMap map;
 
@@ -31,7 +31,7 @@ public class PlayerManager {
     }
 
     public void spawnPlayerInLobby(ServerPlayerEntity player) {
-        players.add(player);
+        gamePlayers.add(player);
         resetPlayer(player, GameMode.ADVENTURE);
     }
 

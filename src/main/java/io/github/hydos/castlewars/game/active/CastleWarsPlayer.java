@@ -1,6 +1,7 @@
 package io.github.hydos.castlewars.game.active;
 
 import net.gegy1000.plasmid.game.player.GameTeam;
+import net.gegy1000.plasmid.util.PlayerRef;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 public class CastleWarsPlayer {
@@ -19,6 +20,6 @@ public class CastleWarsPlayer {
     }
 
     public boolean isOnline() {
-        return player == null;
+        return player != null;
     }
 }

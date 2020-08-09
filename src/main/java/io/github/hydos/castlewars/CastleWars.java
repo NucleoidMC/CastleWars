@@ -2,14 +2,12 @@ package io.github.hydos.castlewars;
 
 import io.github.hydos.castlewars.game.CastleWarsLobby;
 import io.github.hydos.castlewars.game.config.CastleWarsConfig;
-import net.fabricmc.api.ModInitializer;
+import net.fabricmc.api.DedicatedServerModInitializer;
 import net.gegy1000.plasmid.game.GameType;
 import net.minecraft.util.Identifier;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 
-public class CastleWars implements ModInitializer {
+public class CastleWars implements DedicatedServerModInitializer {
 
     public static final String ID = "castlewars";
 
@@ -20,6 +18,7 @@ public class CastleWars implements ModInitializer {
     );
 
     @Override
-    public void onInitialize() {
+    public void onInitializeServer() {
+
     }
 }

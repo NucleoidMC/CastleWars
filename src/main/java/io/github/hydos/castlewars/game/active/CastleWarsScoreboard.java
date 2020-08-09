@@ -149,4 +149,14 @@ public class CastleWarsScoreboard {
 
         render(scoreboard, this.objective, lines);
     }
+
+
+    public void close() {
+        MinecraftServer server = this.game.world.getServer();
+
+        ServerScoreboard scoreboard = server.getScoreboard();
+        this.scoreboardTeams.values().forEach(scoreboard::removeTeam);
+
+        scoreboard.removeObjective(this.objective);
+    }
 }
