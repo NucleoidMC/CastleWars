@@ -24,7 +24,7 @@ public class CastleWarsPlayer {
         return player != null;
     }
 
-    public PlayerRef playerRef(){
+    public PlayerRef playerRef() {
         return PlayerRef.of(player);
     }
 

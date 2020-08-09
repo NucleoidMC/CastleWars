@@ -23,7 +23,6 @@ public class PlayerManager {
 
     private static PlayerManager INSTANCE;
     public final Map<ServerPlayerEntity, CastleWarsPlayer> participants = new HashMap<>();
-    public final List<ServerPlayerEntity> spectators = new ArrayList<>();
     private List<ServerPlayerEntity> lobbyPlayers = new ArrayList<>();
     public final Map<GameTeam, CastleWarsGame.TeamState> teams = new HashMap<>();
 
@@ -51,13 +50,11 @@ public class PlayerManager {
     }
 
     public void makePlayersActive(CastleWarsConfig config) {
-        allocatePlayers(config).forEach((team, player) -> {
-            participants.put(player, new CastleWarsPlayer(team, player));
-        });
+        allocatePlayers(config).forEach((team, player) -> participants.put(player, new CastleWarsPlayer(team, player)));
         for (GameTeam team : config.teams) {
             List<CastleWarsPlayer> participants = this.getTeamPlayers(team).collect(Collectors.toList());
             if (!participants.isEmpty()) {
-                CastleWarsGame.TeamState teamState = new CastleWarsGame.TeamState(team);
+                CastleWarsGame.TeamState teamState = new CastleWarsGame.TeamState(team, config);
                 participants.forEach(participant -> teamState.players.add(participant.player()));
                 this.teams.put(team, teamState);
             }
@@ -68,7 +65,20 @@ public class PlayerManager {
         lobbyPlayers = null;
     }
 
-    private GameTeam getPlayersTeam(CastleWarsPlayer player) {
+    public GameTeam getPlayersTeam(ServerPlayerEntity player) {
+        for (GameTeam team : teams.keySet()) {
+            for (Object teamPlayerObject : getTeamPlayers(team).toArray()) {
+                CastleWarsPlayer teamPlayer = (CastleWarsPlayer) teamPlayerObject;
+                if (teamPlayer.player().getUuid() == player.getUuid()) {
+                    return team;
+                }
+            }
+        }
+        System.out.println("Failed to get players team!");
+        return null;
+    }
+
+    public GameTeam getPlayersTeam(CastleWarsPlayer player) {
         for (GameTeam team : teams.keySet()) {
             for (Object teamPlayerObject : getTeamPlayers(team).toArray()) {
                 CastleWarsPlayer teamPlayer = (CastleWarsPlayer) teamPlayerObject;

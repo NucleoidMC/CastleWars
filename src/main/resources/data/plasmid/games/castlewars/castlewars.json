@@ -1,6 +1,7 @@
 {
   "type": "castlewars:castlewars",
   "map": {
+    "platformSize": 30
   },
   "players": {
     "min": 1,

@@ -2,7 +2,9 @@ package io.github.hydos.castlewars.game.ingame;
 
 import io.github.hydos.castlewars.game.PlayerManager;
 import io.github.hydos.castlewars.game.config.CastleWarsConfig;
+import io.github.hydos.castlewars.game.entities.ProtectThisEntity;
 import io.github.hydos.castlewars.game.map.CastleWarsMap;
+import net.gegy1000.plasmid.game.Game;
 import net.gegy1000.plasmid.game.GameWorld;
 import net.gegy1000.plasmid.game.event.*;
 import net.gegy1000.plasmid.game.player.GameTeam;
@@ -10,11 +12,18 @@ import net.gegy1000.plasmid.game.player.JoinResult;
 import net.gegy1000.plasmid.game.rule.GameRule;
 import net.gegy1000.plasmid.game.rule.RuleResult;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ChunkTicketType;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.LiteralText;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.hit.BlockHitResult;
@@ -35,6 +44,7 @@ public class CastleWarsGame {
     public final CastleWarsScoreboard scoreboard;
     public GameWorld gameWorld;
     private boolean opened;
+    private int ticks = 0;
 
     public CastleWarsGame(GameWorld gameWorld, CastleWarsMap map, CastleWarsConfig config) {
         this.gameWorld = gameWorld;
@@ -52,7 +62,7 @@ public class CastleWarsGame {
         gameWorld.newGame(game -> {
             game.setRule(GameRule.ALLOW_PORTALS, RuleResult.DENY);
             game.setRule(GameRule.ALLOW_PVP, RuleResult.ALLOW);
-            game.setRule(GameRule.INSTANT_LIGHT_TNT, RuleResult.ALLOW);
+            game.setRule(GameRule.INSTANT_LIGHT_TNT, RuleResult.DENY);
             game.setRule(GameRule.ALLOW_CRAFTING, RuleResult.ALLOW);
             game.setRule(GameRule.FALL_DAMAGE, RuleResult.DENY);
             game.setRule(GameRule.ENABLE_HUNGER, RuleResult.DENY);
@@ -65,6 +75,7 @@ public class CastleWarsGame {
 
             game.on(GameTickListener.EVENT, active::tick);
 
+            game.on(PlayerDeathListener.EVENT, active::onPlayerDeath);
             game.on(BreakBlockListener.EVENT, active::onBreakBlock);
             game.on(AttackEntityListener.EVENT, active::onAttackEntity);
             game.on(UseBlockListener.EVENT, active::onUseBlock);
@@ -72,16 +83,41 @@ public class CastleWarsGame {
         });
     }
 
+    private boolean onPlayerDeath(ServerPlayerEntity playerEntity, DamageSource damageSource) {
+        GameTeam playerTeam = PlayerManager.getInstance().getPlayersTeam(playerEntity);
+        PlayerManager.getInstance().teams.get(playerTeam).players.remove(playerEntity);
+        if(PlayerManager.getInstance().teams.get(playerTeam).players.size() == 0){
+            PlayerManager.getInstance().teams.get(playerTeam).eliminated = true;
+            ProtectThisEntity.checkForGameEnd(this.gameWorld);
+        }
+
+        return false;
+    }
+
     private TypedActionResult<ItemStack> onUseItem(ServerPlayerEntity serverPlayerEntity, Hand hand) {
+        ItemStack item = serverPlayerEntity.getStackInHand(hand);
+        if (item.getItem() == Items.WATER_BUCKET || item.getItem() == Items.NETHERITE_BLOCK || item.getItem() == Items.BEDROCK || item.getItem() == Items.OBSIDIAN) {
+            return TypedActionResult.fail(ItemStack.EMPTY);
+        }
         return TypedActionResult.pass(ItemStack.EMPTY);
     }
 
     private ActionResult onUseBlock(ServerPlayerEntity serverPlayerEntity, Hand hand, BlockHitResult blockHitResult) {
+        ItemStack item = serverPlayerEntity.getStackInHand(hand);
+        if (item.getItem() == Items.WATER_BUCKET || item.getItem() == Items.NETHERITE_BLOCK || item.getItem() == Items.BEDROCK || item.getItem() == Items.OBSIDIAN) {
+            return ActionResult.FAIL;
+        }
         return ActionResult.PASS;
     }
 
     private ActionResult onAttackEntity(ServerPlayerEntity serverPlayerEntity, Hand hand, Entity entity, EntityHitResult entityHitResult) {
-        return ActionResult.SUCCESS;
+        if (entity instanceof ServerPlayerEntity) {
+            ServerPlayerEntity attackedEntity = (ServerPlayerEntity) entity;
+            if (PlayerManager.getInstance().getPlayersTeam(attackedEntity) == PlayerManager.getInstance().getPlayersTeam(serverPlayerEntity)) {
+                return ActionResult.FAIL;
+            }
+        }
+        return ActionResult.PASS;
     }
 
     private boolean onBreakBlock(ServerPlayerEntity serverPlayerEntity, BlockPos blockPos) {
@@ -89,21 +125,30 @@ public class CastleWarsGame {
     }
 
     private void tick() {
+        ticks++;
+        if(ticks == 20 * 300){ // 5 minutes
+            for(ServerPlayerEntity player : PlayerManager.getInstance().participants.keySet()){
+                player.networkHandler.sendPacket(new TitleS2CPacket(TitleS2CPacket.Action.SUBTITLE, new LiteralText("Get Ready to fight").formatted(Formatting.DARK_RED, Formatting.BOLD)));
+                player.setGameMode(GameMode.SURVIVAL);
+                player.playSound(SoundEvents.BLOCK_END_PORTAL_SPAWN, 10, 1);
+            }
+        }
         scoreboard.tick();
     }
 
     private void addPlayerDuringGame(ServerPlayerEntity rawPlayer) {
         CastleWarsPlayer player = PlayerManager.getInstance().participants.get(rawPlayer);
-        if (this.opened && PlayerManager.getInstance().isParticipant(rawPlayer)) {
-            if(player.team.getDisplay().equals("Blue")){
+        System.out.println(opened);
+        if (PlayerManager.getInstance().isParticipant(rawPlayer)) {
+            if (player.team.getDisplay().equals("Blue")) {
                 map.spawnPlayerTeamBlue(rawPlayer, world);
             }
-            if(player.team.getDisplay().equals("Red")){
+            if (player.team.getDisplay().equals("Red")) {
                 map.spawnPlayerTeamRed(rawPlayer, world);
             }
             player.player().inventory.clear();
             player.gamemode(GameMode.CREATIVE);
-        }else{
+        } else {
             PlayerManager.getInstance().resetPlayer(rawPlayer, GameMode.SPECTATOR);
         }
     }
@@ -117,23 +162,25 @@ public class CastleWarsGame {
 
     private void onOpen() {
         opened = true;
+        map.spawnVillagers(this);
     }
 
     public static class TeamState {
         public WorldBorder border;
         public final Set<ServerPlayerEntity> players = new HashSet<>();
         public final GameTeam team;
-        boolean eliminated;
+        public boolean eliminated;
 
-        public TeamState(GameTeam team) {
+        public TeamState(GameTeam team, CastleWarsConfig config) {
             this.team = team;
             this.border = new WorldBorder();
+            int borderWidth = config.map.platformSize;
             if (team.getDisplay().equals("Blue")) {
-                border.setCenter(5, 5);
-                border.setSize(10);
+                border.setCenter(borderWidth / 2d, borderWidth / 2d);
+                border.setSize(borderWidth);
             } else {
-                border.setCenter(45, 5);
-                border.setSize(10);
+                border.setCenter(borderWidth / 2d + config.map.platformOffset, borderWidth / 2d);
+                border.setSize(borderWidth);
             }
         }
     }
