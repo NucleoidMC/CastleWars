@@ -1,6 +1,6 @@
 package io.github.hydos.castlewars.game;
 
-import io.github.hydos.castlewars.game.active.CastleWarsGame;
+import io.github.hydos.castlewars.game.ingame.CastleWarsGame;
 import io.github.hydos.castlewars.game.config.CastleWarsConfig;
 import io.github.hydos.castlewars.game.map.CastleWarsMap;
 import io.github.hydos.castlewars.game.map.MapGenerator;
@@ -11,6 +11,7 @@ import net.gegy1000.plasmid.game.event.OfferPlayerListener;
 import net.gegy1000.plasmid.game.event.PlayerAddListener;
 import net.gegy1000.plasmid.game.event.PlayerDeathListener;
 import net.gegy1000.plasmid.game.event.RequestStartListener;
+import net.gegy1000.plasmid.game.player.GameTeam;
 import net.gegy1000.plasmid.game.player.JoinResult;
 import net.gegy1000.plasmid.game.rule.GameRule;
 import net.gegy1000.plasmid.game.rule.RuleResult;
@@ -90,7 +91,7 @@ public class CastleWarsLobby {
     }
 
     private void spawnPlayerToLobby(ServerPlayerEntity player) {
-        this.playerManager.spawnPlayerInLobby(player);
+        this.playerManager.onParticipantJoin(player);
     }
 
 }

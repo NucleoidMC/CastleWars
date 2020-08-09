@@ -1,8 +1,9 @@
-package io.github.hydos.castlewars.game.active;
+package io.github.hydos.castlewars.game.ingame;
 
 import net.gegy1000.plasmid.game.player.GameTeam;
 import net.gegy1000.plasmid.util.PlayerRef;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.world.GameMode;
 
 public class CastleWarsPlayer {
 
@@ -21,5 +22,13 @@ public class CastleWarsPlayer {
 
     public boolean isOnline() {
         return player != null;
+    }
+
+    public PlayerRef playerRef(){
+        return PlayerRef.of(player);
+    }
+
+    public void gamemode(GameMode gamemode) {
+        player.setGameMode(gamemode);
     }
 }

@@ -1,5 +1,6 @@
-package io.github.hydos.castlewars.game.active;
+package io.github.hydos.castlewars.game.ingame;
 
+import io.github.hydos.castlewars.game.PlayerManager;
 import net.gegy1000.plasmid.game.player.GameTeam;
 import net.minecraft.scoreboard.*;
 import net.minecraft.server.MinecraftServer;
@@ -60,7 +61,7 @@ public class CastleWarsScoreboard {
     }
 
     public void addTeam(GameTeam team) {
-        this.game.getTeamPlayers(team).forEach(participant -> {
+        PlayerManager.getInstance().getTeamPlayers(team).forEach(participant -> {
             ServerPlayerEntity player = participant.player();
             if (player == null) return;
 
@@ -110,16 +111,16 @@ public class CastleWarsScoreboard {
 
         lines.add(String.format("%sTime: %s%02d:%02d", Formatting.RED.toString() + Formatting.BOLD, Formatting.RESET, minutes, seconds));
 
-        long playersAlive = this.game.participants()
+        long playersAlive = PlayerManager.getInstance().participants()
                 .filter(participant -> !participant.eliminated && participant.isOnline())
                 .count();
         lines.add(Formatting.BLUE.toString() + playersAlive + " players alive");
         lines.add("");
 
         lines.add(Formatting.BOLD + "Teams:");
-        this.game.teams().forEach(teamState -> {
-            long totalPlayerCount = this.game.getTeamPlayers(teamState.team).count();
-            long alivePlayerCount = this.game.getTeamPlayers(teamState.team)
+        PlayerManager.getInstance().teams().forEach(teamState -> {
+            long totalPlayerCount = PlayerManager.getInstance().getTeamPlayers(teamState.team).count();
+            long alivePlayerCount = PlayerManager.getInstance().getTeamPlayers(teamState.team)
                     .filter(participant -> !participant.eliminated)
                     .count();
 

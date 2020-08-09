@@ -22,13 +22,13 @@ public class MapGenerator {
 
     private CastleWarsMap build() {
         MapTemplate template = MapTemplate.createEmpty();
-        CastleWarsMap map = new CastleWarsMap(template, this.config);
+        CastleWarsMap map = new CastleWarsMap(template);
 
         this.createTeamPlatform(template, 0, 80, Blocks.BLUE_TERRACOTTA, 10);
         this.createTeamPlatform(template, 40, 80, Blocks.RED_TERRACOTTA, 10);
         this.createTeamPlatform(template, 40, 200, Blocks.GLASS, 20);
 
-        map.setSpawn(new BlockPos(50, 201, 0));
+        map.setSpawn(new BlockPos(50, 201, 10));
 
         return map;
     }
