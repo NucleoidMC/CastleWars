@@ -1,0 +1,9 @@
+{
+  "type": "castlewars:castlewars",
+  "map": {
+  },
+  "players": {
+    "min": 1,
+    "max": 50
+  }
+}
