@@ -41,6 +41,10 @@ processResources {
 	}
 }
 
+minecraft {
+	accessWidener "src/main/resources/castlewars.aw"
+}
+
 tasks.withType(JavaCompile) {
 	options.encoding = "UTF-8"
 }

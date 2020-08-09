@@ -2,15 +2,17 @@ package io.github.hydos.castlewars.game.ingame;
 
 import io.github.hydos.castlewars.game.PlayerManager;
 import io.github.hydos.castlewars.game.config.CastleWarsConfig;
+import io.github.hydos.castlewars.game.custom.CustomItems;
 import io.github.hydos.castlewars.game.entities.ProtectThisEntity;
+import io.github.hydos.castlewars.game.entities.SuperRocketEntity;
 import io.github.hydos.castlewars.game.map.CastleWarsMap;
-import net.gegy1000.plasmid.game.Game;
 import net.gegy1000.plasmid.game.GameWorld;
 import net.gegy1000.plasmid.game.event.*;
 import net.gegy1000.plasmid.game.player.GameTeam;
 import net.gegy1000.plasmid.game.player.JoinResult;
 import net.gegy1000.plasmid.game.rule.GameRule;
 import net.gegy1000.plasmid.game.rule.RuleResult;
+import net.gegy1000.plasmid.item.CustomItem;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.item.ItemStack;
@@ -19,11 +21,9 @@ import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ChunkTicketType;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.hit.BlockHitResult;
@@ -86,7 +86,7 @@ public class CastleWarsGame {
     private boolean onPlayerDeath(ServerPlayerEntity playerEntity, DamageSource damageSource) {
         GameTeam playerTeam = PlayerManager.getInstance().getPlayersTeam(playerEntity);
         PlayerManager.getInstance().teams.get(playerTeam).players.remove(playerEntity);
-        if(PlayerManager.getInstance().teams.get(playerTeam).players.size() == 0){
+        if (PlayerManager.getInstance().teams.get(playerTeam).players.size() == 0) {
             PlayerManager.getInstance().teams.get(playerTeam).eliminated = true;
             ProtectThisEntity.checkForGameEnd(this.gameWorld);
         }
@@ -96,6 +96,11 @@ public class CastleWarsGame {
 
     private TypedActionResult<ItemStack> onUseItem(ServerPlayerEntity serverPlayerEntity, Hand hand) {
         ItemStack item = serverPlayerEntity.getStackInHand(hand);
+        if (CustomItem.match(item) == CustomItems.SUPER_ROCKET) {
+            item.setCount(item.getCount() - 1);
+            world.spawnEntity(new SuperRocketEntity(world, serverPlayerEntity.getX(), serverPlayerEntity.getY(), serverPlayerEntity.getZ()));
+            return TypedActionResult.pass(ItemStack.EMPTY);
+        }
         if (item.getItem() == Items.WATER_BUCKET || item.getItem() == Items.NETHERITE_BLOCK || item.getItem() == Items.BEDROCK || item.getItem() == Items.OBSIDIAN) {
             return TypedActionResult.fail(ItemStack.EMPTY);
         }
@@ -126,11 +131,13 @@ public class CastleWarsGame {
 
     private void tick() {
         ticks++;
-        if(ticks == 20 * 300){ // 5 minutes
-            for(ServerPlayerEntity player : PlayerManager.getInstance().participants.keySet()){
-                player.networkHandler.sendPacket(new TitleS2CPacket(TitleS2CPacket.Action.SUBTITLE, new LiteralText("Get Ready to fight").formatted(Formatting.DARK_RED, Formatting.BOLD)));
+        if (ticks == 20 * 300) { // 5 minutes
+            for (ServerPlayerEntity player : PlayerManager.getInstance().participants.keySet()) {
+                TitleS2CPacket packet = new TitleS2CPacket(20, 60, 20);
+                packet.text = new LiteralText("Get Ready To Fight!");
+                player.networkHandler.sendPacket(packet);
                 player.setGameMode(GameMode.SURVIVAL);
-                player.playSound(SoundEvents.BLOCK_END_PORTAL_SPAWN, 10, 1);
+                player.playSound(SoundEvents.BLOCK_END_PORTAL_SPAWN, 100, 1);
             }
         }
         scoreboard.tick();

@@ -18,6 +18,7 @@
       "io.github.hydos.castlewars.CastleWars"
     ]
   },
+  "accessWidener" : "castlewars.aw",
   "mixins": [
     "castlewars.mixins.json"
   ],

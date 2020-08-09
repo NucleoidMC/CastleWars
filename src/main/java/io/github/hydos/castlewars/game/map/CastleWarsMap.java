@@ -53,7 +53,25 @@ public class CastleWarsMap {
         player.teleport(world, blueTeamSpawn.getX(), blueTeamSpawn.getY(), blueTeamSpawn.getZ(), 0, 0);
     }
 
-    private void trySpawnEntity(Entity entity, BlockBounds bounds) {
+    public void trySpawnEntity(Entity entity, BlockBounds bounds) {
+        Vec3d center = bounds.getCenter();
+
+        entity.refreshPositionAndAngles(center.x, bounds.getMin().getY(), center.z, 0.0F, 0.0F);
+
+        if (entity instanceof MobEntity) {
+            MobEntity mob = (MobEntity) entity;
+
+            LocalDifficulty difficulty = entity.world.getLocalDifficulty(mob.getBlockPos());
+            mob.initialize(entity.world, difficulty, SpawnReason.COMMAND, null, null);
+        }
+
+        if (!entity.world.spawnEntity(entity)) {
+            CastleWars.LOGGER.warn("Tried to spawn entity ({}) but the chunk was not loaded", entity);
+        }
+    }
+
+    public void trySpawnEntity(Entity entity, BlockPos pos) {
+        BlockBounds bounds = new BlockBounds(pos, pos);
         Vec3d center = bounds.getCenter();
 
         entity.refreshPositionAndAngles(center.x, bounds.getMin().getY(), center.z, 0.0F, 0.0F);
@@ -75,11 +93,11 @@ public class CastleWarsMap {
             switch (team.getDye()) {
                 case RED:
                     BlockPos pos = new BlockPos(60, 81, 15);
-                    trySpawnEntity(new ProtectThisEntity(game.world, team, game), new BlockBounds(pos, pos));
+                    trySpawnEntity(new ProtectThisEntity(game.world, team, game), pos);
                     break;
                 case BLUE:
                     pos = new BlockPos(10, 81, 15);
-                    trySpawnEntity(new ProtectThisEntity(game.world, team, game), new BlockBounds(pos, pos));
+                    trySpawnEntity(new ProtectThisEntity(game.world, team, game), pos);
                     break;
             }
         }
