@@ -19,7 +19,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.concurrent.CompletableFuture;
 
-public class CastleWarsLobby {
+public class CastleWarsWaiting {
 
     private final GameWorld gameWorld;
     private final CastleWarsMap map;
@@ -27,7 +27,7 @@ public class CastleWarsLobby {
 
     private final PlayerManager playerManager;
 
-    private CastleWarsLobby(GameWorld gameWorld, CastleWarsMap map, CastleWarsConfig config) {
+    private CastleWarsWaiting(GameWorld gameWorld, CastleWarsMap map, CastleWarsConfig config) {
         this.gameWorld = gameWorld;
         this.map = map;
         this.config = config;
@@ -41,7 +41,7 @@ public class CastleWarsLobby {
         return generator.create().thenAccept(map -> {
             GameWorld gameWorld = worldState.openWorld(map.asGenerator());
 
-            CastleWarsLobby waiting = new CastleWarsLobby(gameWorld, map, config);
+            CastleWarsWaiting waiting = new CastleWarsWaiting(gameWorld, map, config);
 
             gameWorld.newGame(game -> {
                 game.setRule(GameRule.ALLOW_CRAFTING, RuleResult.ALLOW);
