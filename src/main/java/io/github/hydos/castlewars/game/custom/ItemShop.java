@@ -1,7 +1,7 @@
 package io.github.hydos.castlewars.game.custom;
 
-import net.gegy1000.plasmid.shop.Cost;
-import net.gegy1000.plasmid.shop.ShopUi;
+import xyz.nucleoid.plasmid.shop.Cost;
+import xyz.nucleoid.plasmid.shop.ShopUi;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;

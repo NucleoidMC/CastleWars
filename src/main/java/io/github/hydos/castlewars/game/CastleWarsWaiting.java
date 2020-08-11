@@ -4,18 +4,20 @@ import io.github.hydos.castlewars.game.config.CastleWarsConfig;
 import io.github.hydos.castlewars.game.ingame.CastleWarsGame;
 import io.github.hydos.castlewars.game.map.CastleWarsMap;
 import io.github.hydos.castlewars.game.map.MapGenerator;
-import net.gegy1000.plasmid.game.GameWorld;
-import net.gegy1000.plasmid.game.GameWorldState;
-import net.gegy1000.plasmid.game.StartResult;
-import net.gegy1000.plasmid.game.event.OfferPlayerListener;
-import net.gegy1000.plasmid.game.event.PlayerAddListener;
-import net.gegy1000.plasmid.game.event.PlayerDeathListener;
-import net.gegy1000.plasmid.game.event.RequestStartListener;
-import net.gegy1000.plasmid.game.player.JoinResult;
-import net.gegy1000.plasmid.game.rule.GameRule;
-import net.gegy1000.plasmid.game.rule.RuleResult;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.world.GameMode;
+import xyz.nucleoid.plasmid.game.GameWorld;
+import xyz.nucleoid.plasmid.game.StartResult;
+import xyz.nucleoid.plasmid.game.event.OfferPlayerListener;
+import xyz.nucleoid.plasmid.game.event.PlayerAddListener;
+import xyz.nucleoid.plasmid.game.event.PlayerDeathListener;
+import xyz.nucleoid.plasmid.game.event.RequestStartListener;
+import xyz.nucleoid.plasmid.game.player.JoinResult;
+import xyz.nucleoid.plasmid.game.rule.GameRule;
+import xyz.nucleoid.plasmid.game.rule.RuleResult;
+import xyz.nucleoid.plasmid.game.world.bubble.BubbleWorldConfig;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -35,11 +37,14 @@ public class CastleWarsWaiting {
         this.playerManager = new PlayerManager(gameWorld, map);
     }
 
-    public static CompletableFuture<Void> open(GameWorldState worldState, CastleWarsConfig config) {
+    public static CompletableFuture<Void> open(MinecraftServer server, CastleWarsConfig config) {
         MapGenerator generator = new MapGenerator(config);
 
         return generator.create().thenAccept(map -> {
-            GameWorld gameWorld = worldState.openWorld(map.asGenerator());
+            BubbleWorldConfig worldConfig = new BubbleWorldConfig()
+                    .setGenerator(map.asGenerator())
+                    .setDefaultGameMode(GameMode.SPECTATOR);
+            GameWorld gameWorld = GameWorld.open(server, worldConfig);
 
             CastleWarsWaiting waiting = new CastleWarsWaiting(gameWorld, map, config);
 

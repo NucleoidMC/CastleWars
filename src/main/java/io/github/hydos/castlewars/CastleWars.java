@@ -3,7 +3,7 @@ package io.github.hydos.castlewars;
 import io.github.hydos.castlewars.game.CastleWarsWaiting;
 import io.github.hydos.castlewars.game.config.CastleWarsConfig;
 import net.fabricmc.api.DedicatedServerModInitializer;
-import net.gegy1000.plasmid.game.GameType;
+import xyz.nucleoid.plasmid.game.GameType;
 import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

@@ -1,7 +1,7 @@
 package io.github.hydos.castlewars.game.ingame;
 
-import net.gegy1000.plasmid.game.player.GameTeam;
-import net.gegy1000.plasmid.util.PlayerRef;
+import xyz.nucleoid.plasmid.game.player.GameTeam;
+import xyz.nucleoid.plasmid.util.PlayerRef;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.GameMode;
 

@@ -1,7 +1,7 @@
 package io.github.hydos.castlewars.game.map;
 
 import io.github.hydos.castlewars.game.config.CastleWarsConfig;
-import net.gegy1000.plasmid.game.map.template.MapTemplate;
+import xyz.nucleoid.plasmid.game.map.template.MapTemplate;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.Util;
