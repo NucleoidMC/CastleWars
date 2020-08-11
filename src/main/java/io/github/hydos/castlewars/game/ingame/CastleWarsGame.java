@@ -127,7 +127,7 @@ public class CastleWarsGame {
 
     private void tick() {
         ticks++;
-        if (ticks == 20 * 300) { // 5 minutes
+        if (ticks == 20 * 180) { // 3 minutes
             for (ServerPlayerEntity player : PlayerManager.getInstance().participants.keySet()) {
                 player.networkHandler.sendPacket(new TitleS2CPacket(20, 60, 20));
                 player.networkHandler.sendPacket(new TitleS2CPacket(TitleS2CPacket.Action.TITLE, new LiteralText("Kill Their Thing idk").formatted(Formatting.RED, Formatting.BOLD)));
