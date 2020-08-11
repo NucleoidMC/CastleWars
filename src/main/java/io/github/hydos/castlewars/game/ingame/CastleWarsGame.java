@@ -3,17 +3,22 @@ package io.github.hydos.castlewars.game.ingame;
 import io.github.hydos.castlewars.game.PlayerManager;
 import io.github.hydos.castlewars.game.config.CastleWarsConfig;
 import io.github.hydos.castlewars.game.custom.CustomGameObjects;
+import io.github.hydos.castlewars.game.entities.GoodFallingBlock;
 import io.github.hydos.castlewars.game.entities.ProtectThisEntity;
 import io.github.hydos.castlewars.game.map.CastleWarsMap;
+import net.gegy1000.plasmid.block.CustomBlock;
 import net.gegy1000.plasmid.game.GameWorld;
 import net.gegy1000.plasmid.game.event.*;
 import net.gegy1000.plasmid.game.player.GameTeam;
 import net.gegy1000.plasmid.game.player.JoinResult;
 import net.gegy1000.plasmid.game.rule.GameRule;
 import net.gegy1000.plasmid.game.rule.RuleResult;
-import net.gegy1000.plasmid.item.CustomItem;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.FallingBlock;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.FallingBlockEntity;
+import net.minecraft.entity.TntEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -46,6 +51,7 @@ public class CastleWarsGame {
     public GameWorld gameWorld;
     private boolean opened;
     private int ticks = 0;
+    private boolean secondHalf = false;
 
     public CastleWarsGame(GameWorld gameWorld, CastleWarsMap map, CastleWarsConfig config) {
         this.gameWorld = gameWorld;
@@ -128,6 +134,7 @@ public class CastleWarsGame {
     private void tick() {
         ticks++;
         if (ticks == 20 * 180) { // 3 minutes
+            secondHalf = true;
             for (ServerPlayerEntity player : PlayerManager.getInstance().participants.keySet()) {
                 player.networkHandler.sendPacket(new TitleS2CPacket(20, 60, 20));
                 player.networkHandler.sendPacket(new TitleS2CPacket(TitleS2CPacket.Action.TITLE, new LiteralText("Kill Their Thing idk").formatted(Formatting.RED, Formatting.BOLD)));
@@ -136,6 +143,19 @@ public class CastleWarsGame {
             }
         }
         scoreboard.tick();
+
+        //Handle custom block logic
+        if (ticks % 20 * 5 == 0) {//20*5 = 5 seconds in ticks
+            for (BlockPos pos : CustomBlock.allOfType(CustomGameObjects.SUPER_ROCKET_LAUNCH_PAD.getBlock())){
+                //fling the block above the launch pad
+                BlockState block = world.getBlockState(pos.add(0,1,0));
+                if(block.getBlock() == Blocks.TNT){
+                    TntEntity blockEntity = new TntEntity(world, pos.getX(), pos.getY()+1, pos.getZ(), null);
+                    blockEntity.setVelocity(0.9f,0.8f,0);
+                    world.spawnEntity(blockEntity);
+                }
+            }
+        }
     }
 
     private void addPlayerDuringGame(ServerPlayerEntity rawPlayer) {
