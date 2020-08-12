@@ -142,26 +142,29 @@ public class CastleWarsGame {
             killPhase = true;
             for (ServerPlayerEntity player : PlayerManager.getInstance().participants.keySet()) {
                 player.networkHandler.sendPacket(new TitleS2CPacket(20, 60, 20));
-                player.networkHandler.sendPacket(new TitleS2CPacket(TitleS2CPacket.Action.TITLE, new LiteralText("Kill\nTheir Thing").formatted(Formatting.RED, Formatting.BOLD)));
-                player.networkHandler.sendPacket(new TitleS2CPacket(TitleS2CPacket.Action.SUBTITLE, new LiteralText("Idk use TNT").formatted(Formatting.YELLOW, Formatting.BOLD)));
+                player.networkHandler.sendPacket(new TitleS2CPacket(TitleS2CPacket.Action.TITLE, new LiteralText("Kill The Other").formatted(Formatting.YELLOW, Formatting.BOLD)));
+                player.networkHandler.sendPacket(new TitleS2CPacket(TitleS2CPacket.Action.SUBTITLE, new LiteralText("Teams Thing").formatted(Formatting.YELLOW, Formatting.BOLD)));
                 player.setGameMode(GameMode.SURVIVAL);
-                player.playSound(SoundEvents.BLOCK_END_PORTAL_SPAWN, 100, 1);
+                player.playSound(SoundEvents.BLOCK_END_PORTAL_SPAWN, 1, 1);
             }
         }
         if (killPhase) {
             //Handle custom block logic
-            if (ticks % (20 * 5) == 0) {//20*5 = 5 seconds in ticks
+            if (ticks % (20 * 3) == 0) {//20*5 = 5 seconds in ticks
                 for (BlockPos pos : CustomBlock.allOfType(CustomGameObjects.SUPER_ROCKET_LAUNCH_PAD.getBlock())) {
-                    //fling the block above the launch pad
-                    BlockState block = world.getBlockState(pos.add(0, 1, 0));
+                    //Make this less OP
+                    if(random.nextDouble() > 0.5){
+                        //fling the block above the launch pad
+                        BlockState block = world.getBlockState(pos.add(0, 1, 0));
 
-                    if (block.getBlock() == Blocks.TNT) {
-                        boolean blueteam = pos.getX() < 31; //blue should be on that side. this hardcoding kills me
+                        if (block.getBlock() == Blocks.TNT) {
+                            boolean blueteam = pos.getX() < 31; //blue should be on that side. this hardcoding kills me
 
-                        TntEntity blockEntity = new TntEntity(world, pos.getX(), pos.getY() + 1, pos.getZ(), null);
-                        blockEntity.setVelocity(blueteam ? 1.4f : -1.4f, random.nextFloat(), 0);
+                            TntEntity blockEntity = new TntEntity(world, pos.getX(), pos.getY() + 1, pos.getZ(), null);
+                            blockEntity.setVelocity(blueteam ? 1.4f : -1.4f, random.nextFloat(), 0);
 
-                        world.spawnEntity(blockEntity);
+                            world.spawnEntity(blockEntity);
+                        }
                     }
                 }
             }
