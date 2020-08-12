@@ -1,12 +1,12 @@
 package io.github.hydos.castlewars.game.ingame;
 
 import io.github.hydos.castlewars.game.PlayerManager;
-import xyz.nucleoid.plasmid.game.player.GameTeam;
 import net.minecraft.scoreboard.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
+import xyz.nucleoid.plasmid.game.player.GameTeam;
 
 import java.util.*;
 

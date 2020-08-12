@@ -5,12 +5,12 @@ import io.github.hydos.castlewars.game.config.CastleWarsConfig;
 import io.github.hydos.castlewars.game.ingame.CastleWarsGame;
 import io.github.hydos.castlewars.game.ingame.CastleWarsPlayer;
 import io.github.hydos.castlewars.game.map.CastleWarsMap;
-import xyz.nucleoid.plasmid.game.GameWorld;
-import xyz.nucleoid.plasmid.game.player.GameTeam;
-import xyz.nucleoid.plasmid.game.player.TeamAllocator;
 import net.minecraft.network.packet.s2c.play.WorldBorderS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.GameMode;
+import xyz.nucleoid.plasmid.game.GameWorld;
+import xyz.nucleoid.plasmid.game.player.GameTeam;
+import xyz.nucleoid.plasmid.game.player.TeamAllocator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,11 +23,10 @@ public class PlayerManager {
 
     private static PlayerManager INSTANCE;
     public final Map<ServerPlayerEntity, CastleWarsPlayer> participants = new HashMap<>();
-    private List<ServerPlayerEntity> lobbyPlayers = new ArrayList<>();
     public final Map<GameTeam, CastleWarsGame.TeamState> teams = new HashMap<>();
-
-    GameWorld gameWorld;
-    CastleWarsMap map;
+    public List<ServerPlayerEntity> lobbyPlayers = new ArrayList<>();
+    final GameWorld gameWorld;
+    final CastleWarsMap map;
 
     public PlayerManager(GameWorld gameWorld, CastleWarsMap map) {
         INSTANCE = this;

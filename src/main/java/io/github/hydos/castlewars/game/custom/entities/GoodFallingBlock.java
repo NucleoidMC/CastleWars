@@ -1,4 +1,4 @@
-package io.github.hydos.castlewars.game.entities;
+package io.github.hydos.castlewars.game.custom.entities;
 
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.FallingBlockEntity;

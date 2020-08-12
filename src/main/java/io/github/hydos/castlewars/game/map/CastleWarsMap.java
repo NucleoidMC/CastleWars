@@ -2,21 +2,14 @@ package io.github.hydos.castlewars.game.map;
 
 import io.github.hydos.castlewars.CastleWars;
 import io.github.hydos.castlewars.game.PlayerManager;
-import io.github.hydos.castlewars.game.entities.ProtectThisEntity;
+import io.github.hydos.castlewars.game.custom.entities.ProtectThisEntity;
 import io.github.hydos.castlewars.game.ingame.CastleWarsGame;
 import net.minecraft.block.Blocks;
-import net.minecraft.entity.boss.BossBar;
-import net.minecraft.entity.boss.ServerBossBar;
-import net.minecraft.network.packet.s2c.play.BossBarS2CPacket;
-import net.minecraft.text.LiteralText;
-import net.minecraft.util.Formatting;
-import xyz.nucleoid.plasmid.game.map.template.MapTemplate;
-import xyz.nucleoid.plasmid.game.map.template.TemplateChunkGenerator;
-import xyz.nucleoid.plasmid.game.player.GameTeam;
-import xyz.nucleoid.plasmid.util.BlockBounds;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.boss.ServerBossBar;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.network.packet.s2c.play.BossBarS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ChunkTicketType;
 import net.minecraft.server.world.ServerWorld;
@@ -25,6 +18,10 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
+import xyz.nucleoid.plasmid.game.map.template.MapTemplate;
+import xyz.nucleoid.plasmid.game.map.template.TemplateChunkGenerator;
+import xyz.nucleoid.plasmid.game.player.GameTeam;
+import xyz.nucleoid.plasmid.util.BlockBounds;
 
 public class CastleWarsMap {
 
@@ -110,29 +107,23 @@ public class CastleWarsMap {
                     BlockPos pos = new BlockPos(60, 81, 15);
                     redVillager = trySpawnEntity(new ProtectThisEntity(game.world, team, game), pos);
                     //bedrock under villagers
-                    template.setBlockState(pos.add(0,-1,0), Blocks.BEDROCK.getDefaultState());
+                    template.setBlockState(pos.add(0, -1, 0), Blocks.BEDROCK.getDefaultState());
                     break;
                 case BLUE:
                     pos = new BlockPos(10, 81, 15);
                     blueVillager = trySpawnEntity(new ProtectThisEntity(game.world, team, game), pos);
                     //bedrock under villagers
-                    template.setBlockState(pos.add(0,-1,0), Blocks.BEDROCK.getDefaultState());
+                    template.setBlockState(pos.add(0, -1, 0), Blocks.BEDROCK.getDefaultState());
                     break;
-            }
-            blueTeam = new ServerBossBar(new LiteralText("Blue").formatted(Formatting.BLUE, Formatting.BOLD), BossBar.Color.BLUE, BossBar.Style.NOTCHED_20);
-            redTeam = new ServerBossBar(new LiteralText("Red").formatted(Formatting.RED, Formatting.BOLD), BossBar.Color.RED, BossBar.Style.NOTCHED_20);
-            for(ServerPlayerEntity player : PlayerManager.getInstance().participants.keySet()){
-                player.networkHandler.sendPacket(new BossBarS2CPacket(BossBarS2CPacket.Type.ADD, blueTeam));
-                player.networkHandler.sendPacket(new BossBarS2CPacket(BossBarS2CPacket.Type.ADD, redTeam));
             }
         }
 
     }
 
-    public void close(CastleWarsGame game){
+    public void close(CastleWarsGame game) {
         game.world.removeEntity(redVillager);
         game.world.removeEntity(blueVillager);
-        for(ServerPlayerEntity player : PlayerManager.getInstance().participants.keySet()){
+        for (ServerPlayerEntity player : PlayerManager.getInstance().participants.keySet()) {
             player.networkHandler.sendPacket(new BossBarS2CPacket(BossBarS2CPacket.Type.ADD, blueTeam));
             player.networkHandler.sendPacket(new BossBarS2CPacket(BossBarS2CPacket.Type.ADD, redTeam));
         }

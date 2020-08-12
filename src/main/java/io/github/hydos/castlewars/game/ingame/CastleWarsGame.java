@@ -4,19 +4,21 @@ import io.github.hydos.castlewars.CastleWars;
 import io.github.hydos.castlewars.game.PlayerManager;
 import io.github.hydos.castlewars.game.config.CastleWarsConfig;
 import io.github.hydos.castlewars.game.custom.CustomGameObjects;
-import io.github.hydos.castlewars.game.entities.ProtectThisEntity;
+import io.github.hydos.castlewars.game.custom.entities.ProtectThisEntity;
 import io.github.hydos.castlewars.game.map.CastleWarsMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.TntEntity;
+import net.minecraft.entity.boss.BossBar;
+import net.minecraft.entity.boss.ServerBossBar;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.network.packet.s2c.play.BossBarS2CPacket;
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ChunkTicketType;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
@@ -27,7 +29,6 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.border.WorldBorder;
 import xyz.nucleoid.plasmid.block.CustomBlock;
@@ -42,17 +43,18 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
+@SuppressWarnings("SameReturnValue")
 public class CastleWarsGame {
 
+    private static final Random random = new Random();
     public final ServerWorld world;
     public final CastleWarsMap map;
     public final CastleWarsConfig config;
     public final CastleWarsScoreboard scoreboard;
-    public GameWorld gameWorld;
+    public final GameWorld gameWorld;
     private boolean opened;
     private int ticks = 0;
     private boolean killPhase = CastleWars.DEBUGGING;
-    private static final Random random = new Random();
 
     public CastleWarsGame(GameWorld gameWorld, CastleWarsMap map, CastleWarsConfig config) {
         this.gameWorld = gameWorld;
@@ -79,7 +81,7 @@ public class CastleWarsGame {
             game.on(GameCloseListener.EVENT, active::onClose);
 
             game.on(OfferPlayerListener.EVENT, player -> JoinResult.ok());
-            game.on(PlayerAddListener.EVENT, active::addPlayerDuringGame);
+            game.on(PlayerAddListener.EVENT, active::addPlayer);
 
             game.on(GameTickListener.EVENT, active::tick);
 
@@ -98,13 +100,12 @@ public class CastleWarsGame {
             PlayerManager.getInstance().teams.get(playerTeam).eliminated = true;
             ProtectThisEntity.checkForGameEnd(this.gameWorld);
         }
-
         return false;
     }
 
     private TypedActionResult<ItemStack> onUseItem(ServerPlayerEntity player, Hand hand) {
         ItemStack item = player.getStackInHand(hand);
-        if (item.getItem() == Items.WATER_BUCKET || item.getItem() == Items.NETHERITE_BLOCK || item.getItem() == Items.BEDROCK || item.getItem() == Items.OBSIDIAN) {
+        if (item.getItem() == Items.WATER_BUCKET) {
             return TypedActionResult.fail(ItemStack.EMPTY);
         }
         return TypedActionResult.pass(ItemStack.EMPTY);
@@ -112,7 +113,7 @@ public class CastleWarsGame {
 
     private ActionResult onUseBlock(ServerPlayerEntity serverPlayerEntity, Hand hand, BlockHitResult blockHitResult) {
         ItemStack item = serverPlayerEntity.getStackInHand(hand);
-        if (item.getItem() == Items.WATER_BUCKET || item.getItem() == Items.NETHERITE_BLOCK || item.getItem() == Items.BEDROCK || item.getItem() == Items.OBSIDIAN) {
+        if (item.getItem() == Items.WATER_BUCKET || item.getItem() == Items.NETHERITE_BLOCK || item.getItem() == Items.BEDROCK || item.getItem() == Items.CRYING_OBSIDIAN) {
             return ActionResult.FAIL;
         }
         return ActionResult.PASS;
@@ -169,7 +170,13 @@ public class CastleWarsGame {
 
     }
 
-    private void addPlayerDuringGame(ServerPlayerEntity rawPlayer) {
+    private void addPlayer(ServerPlayerEntity rawPlayer) {
+        map.blueTeam = new ServerBossBar(new LiteralText("Blue").formatted(Formatting.BLUE, Formatting.BOLD), BossBar.Color.BLUE, BossBar.Style.NOTCHED_20);
+        map.redTeam = new ServerBossBar(new LiteralText("Red").formatted(Formatting.RED, Formatting.BOLD), BossBar.Color.RED, BossBar.Style.NOTCHED_20);
+
+        rawPlayer.networkHandler.sendPacket(new BossBarS2CPacket(BossBarS2CPacket.Type.ADD, map.blueTeam));
+        rawPlayer.networkHandler.sendPacket(new BossBarS2CPacket(BossBarS2CPacket.Type.ADD, map.redTeam));
+
         CastleWarsPlayer player = PlayerManager.getInstance().participants.get(rawPlayer);
         System.out.println(opened);
         if (PlayerManager.getInstance().isParticipant(rawPlayer)) {
@@ -190,11 +197,15 @@ public class CastleWarsGame {
     }
 
     private void onClose() {
+        PlayerManager.getInstance().participants.clear();
+        PlayerManager.getInstance().teams.clear();
+        for (ServerPlayerEntity player : world.getServer().getPlayerManager().getPlayerList()) {
+            player.networkHandler.sendPacket(new BossBarS2CPacket(BossBarS2CPacket.Type.REMOVE, map.blueTeam));
+            player.networkHandler.sendPacket(new BossBarS2CPacket(BossBarS2CPacket.Type.REMOVE, map.redTeam));
+        }
         opened = false;
         scoreboard.close();
         map.close(this);
-        ServerWorld overworld = world.getServer().getOverworld();
-        overworld.getChunkManager().addTicket(ChunkTicketType.field_19347, new ChunkPos(overworld.getSpawnPos()), 4, 1);
         opened = false;
     }
 
@@ -204,9 +215,9 @@ public class CastleWarsGame {
     }
 
     public static class TeamState {
-        public WorldBorder border;
         public final Set<ServerPlayerEntity> players = new HashSet<>();
         public final GameTeam team;
+        public final WorldBorder border;
         public boolean eliminated;
 
         public TeamState(GameTeam team, CastleWarsConfig config) {

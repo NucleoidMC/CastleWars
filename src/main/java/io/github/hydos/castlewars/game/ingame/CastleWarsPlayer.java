@@ -1,14 +1,14 @@
 package io.github.hydos.castlewars.game.ingame;
 
-import xyz.nucleoid.plasmid.game.player.GameTeam;
-import xyz.nucleoid.plasmid.util.PlayerRef;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.GameMode;
+import xyz.nucleoid.plasmid.game.player.GameTeam;
+import xyz.nucleoid.plasmid.util.PlayerRef;
 
 public class CastleWarsPlayer {
 
     private final ServerPlayerEntity player;
-    public GameTeam team;
+    public final GameTeam team;
     public boolean eliminated;
 
     public CastleWarsPlayer(GameTeam team, ServerPlayerEntity playerEntity) {

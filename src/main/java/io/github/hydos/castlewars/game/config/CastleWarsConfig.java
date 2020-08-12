@@ -18,7 +18,7 @@ public class CastleWarsConfig {
 
     public final MapConfig map;
     public final PlayerConfig players;
-    public List<GameTeam> teams;
+    public final List<GameTeam> teams;
 
     public CastleWarsConfig(MapConfig map, PlayerConfig players, List<GameTeam> teams) {
         this.map = map;

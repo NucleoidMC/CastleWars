@@ -1,11 +1,11 @@
 package io.github.hydos.castlewars.game.custom;
 
 import io.github.hydos.castlewars.CastleWars;
-import xyz.nucleoid.plasmid.item.CustomBlockItem;
 import net.minecraft.block.Blocks;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import xyz.nucleoid.plasmid.item.CustomBlockItem;
 
 public class CustomGameObjects {
 
