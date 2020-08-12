@@ -2,8 +2,13 @@ package io.github.hydos.castlewars.game.ingame;
 
 import io.github.hydos.castlewars.game.PlayerManager;
 import io.github.hydos.castlewars.game.config.CastleWarsConfig;
+import io.github.hydos.castlewars.game.custom.CustomGameObjects;
 import io.github.hydos.castlewars.game.entities.ProtectThisEntity;
 import io.github.hydos.castlewars.game.map.CastleWarsMap;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.entity.TntEntity;
+import xyz.nucleoid.plasmid.block.CustomBlock;
 import xyz.nucleoid.plasmid.game.GameWorld;
 import xyz.nucleoid.plasmid.game.event.*;
 import xyz.nucleoid.plasmid.game.player.GameTeam;
@@ -43,6 +48,7 @@ public class CastleWarsGame {
     public GameWorld gameWorld;
     private boolean opened;
     private int ticks = 0;
+    private boolean killPhase;
 
     public CastleWarsGame(GameWorld gameWorld, CastleWarsMap map, CastleWarsConfig config) {
         this.gameWorld = gameWorld;
@@ -125,6 +131,7 @@ public class CastleWarsGame {
     private void tick() {
         ticks++;
         if (ticks == 20 * 300) { // 5 minutes
+            killPhase = true;
             for (ServerPlayerEntity player : PlayerManager.getInstance().participants.keySet()) {
                 player.networkHandler.sendPacket(new TitleS2CPacket(20, 60, 20));
                 player.networkHandler.sendPacket(new TitleS2CPacket(TitleS2CPacket.Action.TITLE, new LiteralText("Kill Their Thing idk").formatted(Formatting.RED, Formatting.BOLD)));
@@ -132,7 +139,22 @@ public class CastleWarsGame {
                 player.playSound(SoundEvents.BLOCK_END_PORTAL_SPAWN, 100, 1);
             }
         }
+        if(killPhase){
+            //Handle custom block logic
+            if (ticks % 20 * 5 == 0) {//20*5 = 5 seconds in ticks
+                for (BlockPos pos : CustomBlock.allOfType(CustomGameObjects.SUPER_ROCKET_LAUNCH_PAD.getBlock())){
+                    //fling the block above the launch pad
+                    BlockState block = world.getBlockState(pos.add(0,1,0));
+                    if(block.getBlock() == Blocks.TNT){
+                        TntEntity blockEntity = new TntEntity(world, pos.getX(), pos.getY()+1, pos.getZ(), null);
+                        blockEntity.setVelocity(0.9f,0.8f,0);
+                        world.spawnEntity(blockEntity);
+                    }
+                }
+            }
+        }
         scoreboard.tick();
+
     }
 
     private void addPlayerDuringGame(ServerPlayerEntity rawPlayer) {
