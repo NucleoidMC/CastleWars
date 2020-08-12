@@ -1,8 +1,15 @@
 package io.github.hydos.castlewars.game.map;
 
 import io.github.hydos.castlewars.CastleWars;
+import io.github.hydos.castlewars.game.PlayerManager;
 import io.github.hydos.castlewars.game.entities.ProtectThisEntity;
 import io.github.hydos.castlewars.game.ingame.CastleWarsGame;
+import net.minecraft.block.Blocks;
+import net.minecraft.entity.boss.BossBar;
+import net.minecraft.entity.boss.ServerBossBar;
+import net.minecraft.network.packet.s2c.play.BossBarS2CPacket;
+import net.minecraft.text.LiteralText;
+import net.minecraft.util.Formatting;
 import xyz.nucleoid.plasmid.game.map.template.MapTemplate;
 import xyz.nucleoid.plasmid.game.map.template.TemplateChunkGenerator;
 import xyz.nucleoid.plasmid.game.player.GameTeam;
@@ -25,6 +32,12 @@ public class CastleWarsMap {
     public final BlockPos redTeamSpawn = new BlockPos(45, 81, 5);
     public final BlockPos blueTeamSpawn = new BlockPos(5, 81, 5);
     public BlockPos defaultSpawn;
+
+    public ServerBossBar blueTeam;
+    public ServerBossBar redTeam;
+
+    private ProtectThisEntity blueVillager;
+    private ProtectThisEntity redVillager;
 
     public CastleWarsMap(MapTemplate template) {
         this.template = template;
@@ -70,7 +83,7 @@ public class CastleWarsMap {
         }
     }
 
-    public void trySpawnEntity(Entity entity, BlockPos pos) {
+    public ProtectThisEntity trySpawnEntity(Entity entity, BlockPos pos) {
         BlockBounds bounds = new BlockBounds(pos, pos);
         Vec3d center = bounds.getCenter();
 
@@ -86,6 +99,8 @@ public class CastleWarsMap {
         if (!entity.world.spawnEntity(entity)) {
             CastleWars.LOGGER.warn("Tried to spawn entity ({}) but the chunk was not loaded", entity);
         }
+        assert entity instanceof ProtectThisEntity;
+        return (ProtectThisEntity) entity;
     }
 
     public void spawnVillagers(CastleWarsGame game) {
@@ -93,13 +108,33 @@ public class CastleWarsMap {
             switch (team.getDye()) {
                 case RED:
                     BlockPos pos = new BlockPos(60, 81, 15);
-                    trySpawnEntity(new ProtectThisEntity(game.world, team, game), pos);
+                    redVillager = trySpawnEntity(new ProtectThisEntity(game.world, team, game), pos);
+                    //bedrock under villagers
+                    template.setBlockState(pos.add(0,-1,0), Blocks.BEDROCK.getDefaultState());
                     break;
                 case BLUE:
                     pos = new BlockPos(10, 81, 15);
-                    trySpawnEntity(new ProtectThisEntity(game.world, team, game), pos);
+                    blueVillager = trySpawnEntity(new ProtectThisEntity(game.world, team, game), pos);
+                    //bedrock under villagers
+                    template.setBlockState(pos.add(0,-1,0), Blocks.BEDROCK.getDefaultState());
                     break;
             }
+            blueTeam = new ServerBossBar(new LiteralText("Blue").formatted(Formatting.BLUE, Formatting.BOLD), BossBar.Color.BLUE, BossBar.Style.NOTCHED_20);
+            redTeam = new ServerBossBar(new LiteralText("Red").formatted(Formatting.RED, Formatting.BOLD), BossBar.Color.RED, BossBar.Style.NOTCHED_20);
+            for(ServerPlayerEntity player : PlayerManager.getInstance().participants.keySet()){
+                player.networkHandler.sendPacket(new BossBarS2CPacket(BossBarS2CPacket.Type.ADD, blueTeam));
+                player.networkHandler.sendPacket(new BossBarS2CPacket(BossBarS2CPacket.Type.ADD, redTeam));
+            }
+        }
+
+    }
+
+    public void close(CastleWarsGame game){
+        game.world.removeEntity(redVillager);
+        game.world.removeEntity(blueVillager);
+        for(ServerPlayerEntity player : PlayerManager.getInstance().participants.keySet()){
+            player.networkHandler.sendPacket(new BossBarS2CPacket(BossBarS2CPacket.Type.ADD, blueTeam));
+            player.networkHandler.sendPacket(new BossBarS2CPacket(BossBarS2CPacket.Type.ADD, redTeam));
         }
     }
 }

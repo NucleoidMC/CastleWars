@@ -6,6 +6,7 @@ import io.github.hydos.castlewars.game.config.CastleWarsConfig;
 import io.github.hydos.castlewars.game.custom.CustomGameObjects;
 import io.github.hydos.castlewars.game.entities.ProtectThisEntity;
 import io.github.hydos.castlewars.game.map.CastleWarsMap;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -128,7 +129,10 @@ public class CastleWarsGame {
     }
 
     private boolean onBreakBlock(ServerPlayerEntity serverPlayerEntity, BlockPos blockPos) {
-        return false;
+        BlockState state = world.getBlockState(blockPos);
+        Block type = state.getBlock();
+        //TODO: config blacklists
+        return type == Blocks.GLASS || type == Blocks.BEDROCK || type == Blocks.BLUE_TERRACOTTA || type == Blocks.RED_TERRACOTTA;
     }
 
     private void tick() {
@@ -137,7 +141,8 @@ public class CastleWarsGame {
             killPhase = true;
             for (ServerPlayerEntity player : PlayerManager.getInstance().participants.keySet()) {
                 player.networkHandler.sendPacket(new TitleS2CPacket(20, 60, 20));
-                player.networkHandler.sendPacket(new TitleS2CPacket(TitleS2CPacket.Action.TITLE, new LiteralText("Kill Their Thing idk").formatted(Formatting.RED, Formatting.BOLD)));
+                player.networkHandler.sendPacket(new TitleS2CPacket(TitleS2CPacket.Action.TITLE, new LiteralText("Kill\nTheir Thing").formatted(Formatting.RED, Formatting.BOLD)));
+                player.networkHandler.sendPacket(new TitleS2CPacket(TitleS2CPacket.Action.SUBTITLE, new LiteralText("Idk use TNT").formatted(Formatting.YELLOW, Formatting.BOLD)));
                 player.setGameMode(GameMode.SURVIVAL);
                 player.playSound(SoundEvents.BLOCK_END_PORTAL_SPAWN, 100, 1);
             }
@@ -177,14 +182,17 @@ public class CastleWarsGame {
             player.player().inventory.clear();
             player.gamemode(GameMode.CREATIVE);
             player.player().networkHandler.sendPacket(new TitleS2CPacket(20, 60, 20));
-            player.player().networkHandler.sendPacket(new TitleS2CPacket(TitleS2CPacket.Action.TITLE, new LiteralText("Protect Your Thing idk").formatted(Formatting.GREEN, Formatting.BOLD)));
+            player.player().networkHandler.sendPacket(new TitleS2CPacket(TitleS2CPacket.Action.TITLE, new LiteralText("Protect").formatted(Formatting.GREEN, Formatting.BOLD)));
+            player.player().networkHandler.sendPacket(new TitleS2CPacket(TitleS2CPacket.Action.SUBTITLE, new LiteralText("Your Villager").formatted(Formatting.GREEN, Formatting.BOLD)));
         } else {
             PlayerManager.getInstance().resetPlayer(rawPlayer, GameMode.SPECTATOR);
         }
     }
 
     private void onClose() {
+        opened = false;
         scoreboard.close();
+        map.close(this);
         ServerWorld overworld = world.getServer().getOverworld();
         overworld.getChunkManager().addTicket(ChunkTicketType.field_19347, new ChunkPos(overworld.getSpawnPos()), 4, 1);
         opened = false;

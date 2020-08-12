@@ -1,4 +1,4 @@
-package io.github.hydos.castlewars.game.map;
+package io.github.hydos.castlewars.game.config;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;

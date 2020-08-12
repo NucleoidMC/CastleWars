@@ -2,7 +2,6 @@ package io.github.hydos.castlewars.game.config;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import io.github.hydos.castlewars.game.map.MapConfig;
 import xyz.nucleoid.plasmid.game.config.PlayerConfig;
 import xyz.nucleoid.plasmid.game.player.GameTeam;
 
