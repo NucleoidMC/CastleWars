@@ -121,8 +121,8 @@ public class CastleWarsMap {
     }
 
     public void close(CastleWarsGame game) {
-        game.world.removeEntity(redVillager);
-        game.world.removeEntity(blueVillager);
+//        game.world.removeEntity(redVillager);
+//        game.world.removeEntity(blueVillager);
         for (ServerPlayerEntity player : PlayerManager.getInstance().participants.keySet()) {
             player.networkHandler.sendPacket(new BossBarS2CPacket(BossBarS2CPacket.Type.ADD, blueTeam));
             player.networkHandler.sendPacket(new BossBarS2CPacket(BossBarS2CPacket.Type.ADD, redTeam));

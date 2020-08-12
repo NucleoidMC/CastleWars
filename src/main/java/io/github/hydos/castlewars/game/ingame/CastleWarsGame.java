@@ -113,7 +113,7 @@ public class CastleWarsGame {
 
     private ActionResult onUseBlock(ServerPlayerEntity serverPlayerEntity, Hand hand, BlockHitResult blockHitResult) {
         ItemStack item = serverPlayerEntity.getStackInHand(hand);
-        if (item.getItem() == Items.WATER_BUCKET || item.getItem() == Items.NETHERITE_BLOCK || item.getItem() == Items.BEDROCK || item.getItem() == Items.CRYING_OBSIDIAN) {
+        if (item.getItem() == Items.WATER_BUCKET || item.getItem() == Items.NETHERITE_BLOCK || item.getItem() == Items.BEDROCK || item.getItem() == Items.CRYING_OBSIDIAN|| item.getItem() == Items.OBSIDIAN) {
             return ActionResult.FAIL;
         }
         return ActionResult.PASS;
