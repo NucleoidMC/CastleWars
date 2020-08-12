@@ -20,6 +20,8 @@ public class CastleWars implements DedicatedServerModInitializer {
             CastleWarsConfig.CODEC
     );
 
+    public static final boolean DEBUGGING = true;
+
     @Override
     public void onInitializeServer() {
 

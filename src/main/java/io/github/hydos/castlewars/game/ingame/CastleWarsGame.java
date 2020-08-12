@@ -1,5 +1,6 @@
 package io.github.hydos.castlewars.game.ingame;
 
+import io.github.hydos.castlewars.CastleWars;
 import io.github.hydos.castlewars.game.PlayerManager;
 import io.github.hydos.castlewars.game.config.CastleWarsConfig;
 import io.github.hydos.castlewars.game.custom.CustomGameObjects;
@@ -7,15 +8,8 @@ import io.github.hydos.castlewars.game.entities.ProtectThisEntity;
 import io.github.hydos.castlewars.game.map.CastleWarsMap;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.entity.TntEntity;
-import xyz.nucleoid.plasmid.block.CustomBlock;
-import xyz.nucleoid.plasmid.game.GameWorld;
-import xyz.nucleoid.plasmid.game.event.*;
-import xyz.nucleoid.plasmid.game.player.GameTeam;
-import xyz.nucleoid.plasmid.game.player.JoinResult;
-import xyz.nucleoid.plasmid.game.rule.GameRule;
-import xyz.nucleoid.plasmid.game.rule.RuleResult;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.TntEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -35,8 +29,16 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.border.WorldBorder;
+import xyz.nucleoid.plasmid.block.CustomBlock;
+import xyz.nucleoid.plasmid.game.GameWorld;
+import xyz.nucleoid.plasmid.game.event.*;
+import xyz.nucleoid.plasmid.game.player.GameTeam;
+import xyz.nucleoid.plasmid.game.player.JoinResult;
+import xyz.nucleoid.plasmid.game.rule.GameRule;
+import xyz.nucleoid.plasmid.game.rule.RuleResult;
 
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 public class CastleWarsGame {
@@ -48,7 +50,8 @@ public class CastleWarsGame {
     public GameWorld gameWorld;
     private boolean opened;
     private int ticks = 0;
-    private boolean killPhase;
+    private boolean killPhase = CastleWars.DEBUGGING;
+    private static final Random random = new Random();
 
     public CastleWarsGame(GameWorld gameWorld, CastleWarsMap map, CastleWarsConfig config) {
         this.gameWorld = gameWorld;
@@ -139,15 +142,19 @@ public class CastleWarsGame {
                 player.playSound(SoundEvents.BLOCK_END_PORTAL_SPAWN, 100, 1);
             }
         }
-        if(killPhase){
+        if (killPhase) {
             //Handle custom block logic
-            if (ticks % 20 * 5 == 0) {//20*5 = 5 seconds in ticks
-                for (BlockPos pos : CustomBlock.allOfType(CustomGameObjects.SUPER_ROCKET_LAUNCH_PAD.getBlock())){
+            if (ticks % (20 * 5) == 0) {//20*5 = 5 seconds in ticks
+                for (BlockPos pos : CustomBlock.allOfType(CustomGameObjects.SUPER_ROCKET_LAUNCH_PAD.getBlock())) {
                     //fling the block above the launch pad
-                    BlockState block = world.getBlockState(pos.add(0,1,0));
-                    if(block.getBlock() == Blocks.TNT){
-                        TntEntity blockEntity = new TntEntity(world, pos.getX(), pos.getY()+1, pos.getZ(), null);
-                        blockEntity.setVelocity(0.9f,0.8f,0);
+                    BlockState block = world.getBlockState(pos.add(0, 1, 0));
+
+                    if (block.getBlock() == Blocks.TNT) {
+                        boolean blueteam = pos.getX() < 31; //blue should be on that side. this hardcoding kills me
+
+                        TntEntity blockEntity = new TntEntity(world, pos.getX(), pos.getY() + 1, pos.getZ(), null);
+                        blockEntity.setVelocity(blueteam ? 1.4f : -1.4f, random.nextFloat(), 0);
+
                         world.spawnEntity(blockEntity);
                     }
                 }
@@ -164,7 +171,7 @@ public class CastleWarsGame {
             if (player.team.getDisplay().equals("Blue")) {
                 map.spawnPlayerTeamBlue(rawPlayer, world);
             }
-                if (player.team.getDisplay().equals("Red")) {
+            if (player.team.getDisplay().equals("Red")) {
                 map.spawnPlayerTeamRed(rawPlayer, world);
             }
             player.player().inventory.clear();
@@ -200,11 +207,10 @@ public class CastleWarsGame {
             int borderWidth = config.map.platformSize;
             if (team.getDisplay().equals("Blue")) {
                 border.setCenter(borderWidth / 2d, borderWidth / 2d);
-                border.setSize(borderWidth);
             } else {
                 border.setCenter(borderWidth / 2d + config.map.platformOffset, borderWidth / 2d);
-                border.setSize(borderWidth);
             }
+            border.setSize(borderWidth);
         }
     }
 }
