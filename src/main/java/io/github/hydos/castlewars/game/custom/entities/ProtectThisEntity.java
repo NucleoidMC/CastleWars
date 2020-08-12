@@ -37,13 +37,21 @@ public class ProtectThisEntity extends VillagerEntity {
         this.setCustomNameVisible(true);
     }
 
+    @Override
+    public void tick() {
+        if(game.killPhase){
+            this.setInvulnerable(false);
+        }
+        super.tick();
+    }
+
     public static void checkForGameEnd(GameWorld gameWorld) {
         if (PlayerManager.getInstance().teams().filter(teamState -> !teamState.eliminated).toArray().length != PlayerManager.getInstance().teams.size()) {
             //someone has been eliminated. figure out who hasnt
             PlayerManager.getInstance().teams().filter(teamState -> !teamState.eliminated).forEach(teamState -> {
                 for (ServerPlayerEntity playerEntity : PlayerManager.getInstance().participants.keySet()) {
                     playerEntity.sendMessage(new LiteralText(teamState.team.getDisplay() + " Has won the game!").formatted(Formatting.GOLD, Formatting.BOLD), false);
-                    gameWorld.closeWorld();
+                    gameWorld.close();
                 }
             });
 
@@ -69,12 +77,6 @@ public class ProtectThisEntity extends VillagerEntity {
     }
 
     @Override
-    public boolean damage(DamageSource source, float amount) {
-        applyDamage(source, amount);
-        return true;
-    }
-
-    @Override
     public void applyDamage(DamageSource source, float amount) {
         if (team.getDisplay().equals("Blue")) {
             game.map.blueTeam.setPercent(game.map.blueTeam.getPercent() - (amount / 20));
@@ -84,9 +86,6 @@ public class ProtectThisEntity extends VillagerEntity {
             updateBossBar(game.map.redTeam);
         }
         super.applyDamage(source, amount);
-        if (getHealth() == 0) {
-            onDeath(source);
-        }
     }
 
     @Override

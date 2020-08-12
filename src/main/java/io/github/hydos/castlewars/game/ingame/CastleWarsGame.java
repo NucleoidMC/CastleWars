@@ -54,7 +54,7 @@ public class CastleWarsGame {
     public final GameWorld gameWorld;
     private boolean opened;
     private int ticks = 0;
-    private boolean killPhase = CastleWars.DEBUGGING;
+    public boolean killPhase = CastleWars.DEBUGGING;
 
     public CastleWarsGame(GameWorld gameWorld, CastleWarsMap map, CastleWarsConfig config) {
         this.gameWorld = gameWorld;
@@ -70,12 +70,12 @@ public class CastleWarsGame {
         PlayerManager.getInstance().makePlayersActive(config);
 
         gameWorld.newGame(game -> {
-            game.setRule(GameRule.ALLOW_PORTALS, RuleResult.DENY);
-            game.setRule(GameRule.ALLOW_PVP, RuleResult.ALLOW);
-            game.setRule(GameRule.INSTANT_LIGHT_TNT, RuleResult.DENY);
-            game.setRule(GameRule.ALLOW_CRAFTING, RuleResult.ALLOW);
+            game.setRule(GameRule.PORTALS, RuleResult.DENY);
+            game.setRule(GameRule.PVP, RuleResult.ALLOW);
+            game.setRule(GameRule.UNSTABLE_TNT, RuleResult.DENY);
+            game.setRule(GameRule.CRAFTING, RuleResult.ALLOW);
             game.setRule(GameRule.FALL_DAMAGE, RuleResult.DENY);
-            game.setRule(GameRule.ENABLE_HUNGER, RuleResult.DENY);
+            game.setRule(GameRule.HUNGER, RuleResult.DENY);
 
             game.on(GameOpenListener.EVENT, active::onOpen);
             game.on(GameCloseListener.EVENT, active::onClose);
@@ -140,6 +140,7 @@ public class CastleWarsGame {
         ticks++;
         if (ticks == 20 * 300) { // 5 minutes
             killPhase = true;
+
             for (ServerPlayerEntity player : PlayerManager.getInstance().participants.keySet()) {
                 player.networkHandler.sendPacket(new TitleS2CPacket(20, 60, 20));
                 player.networkHandler.sendPacket(new TitleS2CPacket(TitleS2CPacket.Action.TITLE, new LiteralText("Kill The Other").formatted(Formatting.YELLOW, Formatting.BOLD)));
@@ -200,8 +201,6 @@ public class CastleWarsGame {
     }
 
     private void onClose() {
-        PlayerManager.getInstance().participants.clear();
-        PlayerManager.getInstance().teams.clear();
         for (ServerPlayerEntity player : world.getServer().getPlayerManager().getPlayerList()) {
             player.networkHandler.sendPacket(new BossBarS2CPacket(BossBarS2CPacket.Type.REMOVE, map.blueTeam));
             player.networkHandler.sendPacket(new BossBarS2CPacket(BossBarS2CPacket.Type.REMOVE, map.redTeam));
