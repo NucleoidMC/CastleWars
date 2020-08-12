@@ -7,6 +7,7 @@ import io.github.hydos.castlewars.game.map.MapGenerator;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.ActionResult;
 import net.minecraft.world.GameMode;
 import xyz.nucleoid.plasmid.game.GameWorld;
 import xyz.nucleoid.plasmid.game.StartResult;
@@ -84,14 +85,14 @@ public class CastleWarsWaiting {
         this.spawnPlayerToLobby(player);
     }
 
-    private boolean onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
-        this.playerDied(player);
-        return true;
+    private ActionResult onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
+        return this.playerDied(player);
     }
 
-    private void playerDied(ServerPlayerEntity player) {
+    private ActionResult playerDied(ServerPlayerEntity player) {
         player.setHealth(20);
         spawnPlayerToLobby(player);
+        return ActionResult.PASS;
     }
 
     private void spawnPlayerToLobby(ServerPlayerEntity player) {

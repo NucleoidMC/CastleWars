@@ -3,7 +3,6 @@ package io.github.hydos.castlewars.game.ingame;
 import io.github.hydos.castlewars.CastleWars;
 import io.github.hydos.castlewars.game.PlayerManager;
 import io.github.hydos.castlewars.game.config.CastleWarsConfig;
-import io.github.hydos.castlewars.game.custom.CustomGameObjects;
 import io.github.hydos.castlewars.game.custom.entities.ProtectThisEntity;
 import io.github.hydos.castlewars.game.map.CastleWarsMap;
 import net.minecraft.block.Block;

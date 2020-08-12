@@ -47,7 +47,7 @@ public class CastleWarsMap {
     }
 
     public ChunkGenerator asGenerator(MinecraftServer server) {
-        return new TemplateChunkGenerator(server, this.template, BlockPos.ORIGIN);
+        return new TemplateChunkGenerator(this.template, BlockPos.ORIGIN);
     }
 
     public void spawnPlayerIntoLobby(ServerPlayerEntity player, ServerWorld world) {
