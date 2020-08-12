@@ -3,9 +3,12 @@ package io.github.hydos.castlewars;
 import io.github.hydos.castlewars.game.CastleWarsWaiting;
 import io.github.hydos.castlewars.game.block.LaunchPadBlock;
 import io.github.hydos.castlewars.game.config.CastleWarsConfig;
+import io.github.hydos.castlewars.game.custom.FakeBlockItem;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Material;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.Item;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import org.apache.logging.log4j.LogManager;
@@ -19,7 +22,7 @@ public class CastleWars implements DedicatedServerModInitializer {
     public static final Logger LOGGER = LogManager.getLogger(ID);
 
     public static final GameType<CastleWarsConfig> TYPE = GameType.register(
-            new Identifier(CastleWars.ID, "castlewars"),
+            new Identifier(CastleWars.ID, ID),
             CastleWarsWaiting::open,
             CastleWarsConfig.CODEC
     );
@@ -27,8 +30,13 @@ public class CastleWars implements DedicatedServerModInitializer {
     public static final boolean DEBUGGING = false;
 
     public static final LaunchPadBlock LAUNCH_PAD_BLOCK = Registry.register(Registry.BLOCK, new Identifier(ID, "launch_pad_block"), new LaunchPadBlock(AbstractBlock.Settings.of(Material.METAL)));
+    public static final Item LAUNCH_PAD_BLOCK_ITEM = Registry.register(Registry.ITEM, new Identifier(ID, "launch_pad_item"), new FakeBlockItem(LAUNCH_PAD_BLOCK, new Item.Settings()));
+
+//    public static final BlockEntityType<LaunchPadBlockEntity> LAUNCH_PAD_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(ID, "launch_pad_block"), BlockEntityType.Builder.create(LaunchPadBlockEntity::new, LAUNCH_PAD_BLOCK).build(null));
 
     @Override
     public void onInitializeServer() {
+        LOGGER.info(LAUNCH_PAD_BLOCK);
+        LOGGER.info(LAUNCH_PAD_BLOCK_ITEM);
     }
 }

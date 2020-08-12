@@ -24,6 +24,6 @@ public class LaunchPadBlock extends Block implements FakeBlock<Block> {
 
     @Override
     public Block getFaking() {
-        return Blocks.SMOOTH_STONE_SLAB;
+        return Blocks.REDSTONE_LAMP;
     }
 }

@@ -46,6 +46,7 @@ import java.util.Set;
 public class CastleWarsGame {
 
     private static final Random random = new Random();
+    private static CastleWarsGame INSTANCE = null;
     public final ServerWorld world;
     public final CastleWarsMap map;
     public final CastleWarsConfig config;
@@ -53,7 +54,7 @@ public class CastleWarsGame {
     public final GameWorld gameWorld;
     public boolean closed;
     public boolean killPhase = CastleWars.DEBUGGING;
-    private int ticks = 0;
+    public int ticks = 0;
 
     public CastleWarsGame(GameWorld gameWorld, CastleWarsMap map, CastleWarsConfig config) {
         this.closed = false;
@@ -64,8 +65,13 @@ public class CastleWarsGame {
         this.scoreboard = CastleWarsScoreboard.create(this);
     }
 
+    public static CastleWarsGame getInstance(){
+        return INSTANCE;
+    }
+
     public static void open(GameWorld gameWorld, CastleWarsMap map, CastleWarsConfig config) {
         CastleWarsGame active = new CastleWarsGame(gameWorld, map, config);
+        INSTANCE = active;//i hope only 1 game runs at a time
         PlayerManager.getInstance().makePlayersActive(config);
 
         gameWorld.openGame(game -> {
@@ -92,14 +98,14 @@ public class CastleWarsGame {
         });
     }
 
-    private boolean onPlayerDeath(ServerPlayerEntity playerEntity, DamageSource damageSource) {
+    private ActionResult onPlayerDeath(ServerPlayerEntity playerEntity, DamageSource damageSource) {
         GameTeam playerTeam = PlayerManager.getInstance().getPlayersTeam(playerEntity);
         PlayerManager.getInstance().teams.get(playerTeam).players.remove(playerEntity);
         if (PlayerManager.getInstance().teams.get(playerTeam).players.size() == 0) {
             PlayerManager.getInstance().teams.get(playerTeam).eliminated = true;
             ProtectThisEntity.checkForGameEnd(this.gameWorld);
         }
-        return false;
+        return ActionResult.PASS;
     }
 
     private TypedActionResult<ItemStack> onUseItem(ServerPlayerEntity player, Hand hand) {
@@ -155,22 +161,22 @@ public class CastleWarsGame {
         if (killPhase) {
             //Handle custom block logic
             if (ticks % (20 * 3) == 0) {//20*5 = 5 seconds in ticks
-                for (BlockPos pos : CustomBlock.allOfType(CustomGameObjects.SUPER_ROCKET_LAUNCH_PAD.getBlock())) {
-                    //Make this less OP
-                    if (random.nextDouble() > 0.5) {
-                        //fling the block above the launch pad
-                        BlockState block = world.getBlockState(pos.add(0, 1, 0));
-
-                        if (block.getBlock() == Blocks.TNT) {
-                            boolean blueteam = pos.getX() < 31; //blue should be on that side. this hardcoding kills me
-
-                            TntEntity blockEntity = new TntEntity(world, pos.getX(), pos.getY() + 1, pos.getZ(), null);
-                            blockEntity.setVelocity(blueteam ? 1.4f : -1.4f, random.nextFloat(), 0);
-
-                            world.spawnEntity(blockEntity);
-                        }
-                    }
-                }
+//                for (BlockPos pos : CustomBlock.allOfType(CustomGameObjects.SUPER_ROCKET_LAUNCH_PAD.getBlock())) {
+//                    //Make this less OP
+//                    if (random.nextDouble() > 0.5) {
+//                        //fling the block above the launch pad
+//                        BlockState block = world.getBlockState(pos.add(0, 1, 0));
+//
+//                        if (block.getBlock() == Blocks.TNT) {
+//                            boolean blueteam = pos.getX() < 31; //blue should be on that side. this hardcoding kills me
+//
+//                            TntEntity blockEntity = new TntEntity(world, pos.getX(), pos.getY() + 1, pos.getZ(), null);
+//                            blockEntity.setVelocity(blueteam ? 1.4f : -1.4f, random.nextFloat(), 0);
+//
+//                            world.spawnEntity(blockEntity);
+//                        }
+//                    }
+//                }
             }
         }
         scoreboard.tick();

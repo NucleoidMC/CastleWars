@@ -30,7 +30,7 @@ public class ProtectThisEntity extends VillagerEntity {
         this.team = team;
         this.game = game;
 
-        this.setCustomName(new LiteralText("Health ???/???"));
+        this.setCustomName(new LiteralText("Protecc This Entity").formatted(Formatting.YELLOW, Formatting.BOLD));
 
         this.setAiDisabled(true);
         this.setInvulnerable(true);
