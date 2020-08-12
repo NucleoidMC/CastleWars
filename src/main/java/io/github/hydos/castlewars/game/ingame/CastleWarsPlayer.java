@@ -7,8 +7,8 @@ import xyz.nucleoid.plasmid.util.PlayerRef;
 
 public class CastleWarsPlayer {
 
-    private final ServerPlayerEntity player;
     public final GameTeam team;
+    private final ServerPlayerEntity player;
     public boolean eliminated;
 
     public CastleWarsPlayer(GameTeam team, ServerPlayerEntity playerEntity) {

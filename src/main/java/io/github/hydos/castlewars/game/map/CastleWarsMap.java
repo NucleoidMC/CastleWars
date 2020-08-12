@@ -10,6 +10,7 @@ import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.boss.ServerBossBar;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.network.packet.s2c.play.BossBarS2CPacket;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ChunkTicketType;
 import net.minecraft.server.world.ServerWorld;
@@ -17,6 +18,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.LocalDifficulty;
+import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import xyz.nucleoid.plasmid.game.map.template.MapTemplate;
 import xyz.nucleoid.plasmid.game.map.template.TemplateChunkGenerator;
@@ -44,8 +46,8 @@ public class CastleWarsMap {
         this.defaultSpawn = blockPos;
     }
 
-    public ChunkGenerator asGenerator() {
-        return new TemplateChunkGenerator(this.template, BlockPos.ORIGIN);
+    public ChunkGenerator asGenerator(MinecraftServer server) {
+        return new TemplateChunkGenerator(server, this.template, BlockPos.ORIGIN);
     }
 
     public void spawnPlayerIntoLobby(ServerPlayerEntity player, ServerWorld world) {
@@ -72,7 +74,7 @@ public class CastleWarsMap {
             MobEntity mob = (MobEntity) entity;
 
             LocalDifficulty difficulty = entity.world.getLocalDifficulty(mob.getBlockPos());
-            mob.initialize(entity.world, difficulty, SpawnReason.COMMAND, null, null);
+            mob.initialize((ServerWorldAccess) entity.world, difficulty, SpawnReason.COMMAND, null, null);
         }
 
         if (!entity.world.spawnEntity(entity)) {
@@ -90,7 +92,7 @@ public class CastleWarsMap {
             MobEntity mob = (MobEntity) entity;
 
             LocalDifficulty difficulty = entity.world.getLocalDifficulty(mob.getBlockPos());
-            mob.initialize(entity.world, difficulty, SpawnReason.COMMAND, null, null);
+            mob.initialize((ServerWorldAccess) entity.world, difficulty, SpawnReason.COMMAND, null, null);
         }
 
         if (!entity.world.spawnEntity(entity)) {

@@ -19,7 +19,7 @@ public class MapGenerator {
     }
 
     public CompletableFuture<CastleWarsMap> create() {
-        return CompletableFuture.supplyAsync(this::build, Util.getServerWorkerExecutor());
+        return CompletableFuture.supplyAsync(this::build, Util.getMainWorkerExecutor());
     }
 
     private CastleWarsMap build() {

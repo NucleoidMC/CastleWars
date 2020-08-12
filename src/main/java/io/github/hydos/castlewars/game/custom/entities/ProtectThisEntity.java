@@ -37,14 +37,6 @@ public class ProtectThisEntity extends VillagerEntity {
         this.setCustomNameVisible(true);
     }
 
-    @Override
-    public void tick() {
-        if(game.killPhase){
-            this.setInvulnerable(false);
-        }
-        super.tick();
-    }
-
     public static void checkForGameEnd(GameWorld gameWorld) {
         if (PlayerManager.getInstance().teams().filter(teamState -> !teamState.eliminated).toArray().length != PlayerManager.getInstance().teams.size()) {
             //someone has been eliminated. figure out who hasnt
@@ -65,6 +57,17 @@ public class ProtectThisEntity extends VillagerEntity {
     }
 
     @Override
+    public void tick() {
+        if (game.closed) {
+            kill();
+        }
+        if (game.killPhase) {
+            this.setInvulnerable(false);
+        }
+        super.tick();
+    }
+
+    @Override
     public ActionResult interactMob(PlayerEntity player, Hand hand) {
         player.openHandledScreen(ItemShop.create());
         return ActionResult.SUCCESS;
@@ -72,6 +75,10 @@ public class ProtectThisEntity extends VillagerEntity {
 
     @Override
     public void onDeath(DamageSource source) {
+        if (game.closed) {
+            super.onDeath(source);
+            return;
+        }
         PlayerManager.getInstance().teams.get(team).eliminated = true;
         checkForGameEnd(game.gameWorld);
     }

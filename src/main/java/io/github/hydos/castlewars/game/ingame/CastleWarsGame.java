@@ -52,24 +52,24 @@ public class CastleWarsGame {
     public final CastleWarsConfig config;
     public final CastleWarsScoreboard scoreboard;
     public final GameWorld gameWorld;
-    private boolean opened;
-    private int ticks = 0;
+    public boolean closed;
     public boolean killPhase = CastleWars.DEBUGGING;
+    private int ticks = 0;
 
     public CastleWarsGame(GameWorld gameWorld, CastleWarsMap map, CastleWarsConfig config) {
+        this.closed = false;
         this.gameWorld = gameWorld;
         this.world = gameWorld.getWorld();
         this.map = map;
         this.config = config;
         this.scoreboard = CastleWarsScoreboard.create(this);
-
     }
 
     public static void open(GameWorld gameWorld, CastleWarsMap map, CastleWarsConfig config) {
         CastleWarsGame active = new CastleWarsGame(gameWorld, map, config);
         PlayerManager.getInstance().makePlayersActive(config);
 
-        gameWorld.newGame(game -> {
+        gameWorld.openGame(game -> {
             game.setRule(GameRule.PORTALS, RuleResult.DENY);
             game.setRule(GameRule.PVP, RuleResult.ALLOW);
             game.setRule(GameRule.UNSTABLE_TNT, RuleResult.DENY);
@@ -113,7 +113,7 @@ public class CastleWarsGame {
 
     private ActionResult onUseBlock(ServerPlayerEntity serverPlayerEntity, Hand hand, BlockHitResult blockHitResult) {
         ItemStack item = serverPlayerEntity.getStackInHand(hand);
-        if (item.getItem() == Items.WATER_BUCKET || item.getItem() == Items.NETHERITE_BLOCK || item.getItem() == Items.BEDROCK || item.getItem() == Items.CRYING_OBSIDIAN|| item.getItem() == Items.OBSIDIAN) {
+        if (item.getItem() == Items.WATER_BUCKET || item.getItem() == Items.NETHERITE_BLOCK || item.getItem() == Items.BEDROCK || item.getItem() == Items.CRYING_OBSIDIAN || item.getItem() == Items.OBSIDIAN) {
             return ActionResult.FAIL;
         }
         return ActionResult.PASS;
@@ -141,6 +141,10 @@ public class CastleWarsGame {
         if (ticks == 20 * 300) { // 5 minutes
             killPhase = true;
 
+            if (config.bridges) {
+                PlayerManager.getInstance().removeWorldBorder(config);
+            }
+
             for (ServerPlayerEntity player : PlayerManager.getInstance().participants.keySet()) {
                 player.networkHandler.sendPacket(new TitleS2CPacket(20, 60, 20));
                 player.networkHandler.sendPacket(new TitleS2CPacket(TitleS2CPacket.Action.TITLE, new LiteralText("Kill The Other").formatted(Formatting.YELLOW, Formatting.BOLD)));
@@ -154,7 +158,7 @@ public class CastleWarsGame {
             if (ticks % (20 * 3) == 0) {//20*5 = 5 seconds in ticks
                 for (BlockPos pos : CustomBlock.allOfType(CustomGameObjects.SUPER_ROCKET_LAUNCH_PAD.getBlock())) {
                     //Make this less OP
-                    if(random.nextDouble() > 0.5){
+                    if (random.nextDouble() > 0.5) {
                         //fling the block above the launch pad
                         BlockState block = world.getBlockState(pos.add(0, 1, 0));
 
@@ -182,7 +186,6 @@ public class CastleWarsGame {
         rawPlayer.networkHandler.sendPacket(new BossBarS2CPacket(BossBarS2CPacket.Type.ADD, map.redTeam));
 
         CastleWarsPlayer player = PlayerManager.getInstance().participants.get(rawPlayer);
-        System.out.println(opened);
         if (PlayerManager.getInstance().isParticipant(rawPlayer)) {
             if (player.team.getDisplay().equals("Blue")) {
                 map.spawnPlayerTeamBlue(rawPlayer, world);
@@ -201,18 +204,16 @@ public class CastleWarsGame {
     }
 
     private void onClose() {
+        closed = true;
         for (ServerPlayerEntity player : world.getServer().getPlayerManager().getPlayerList()) {
             player.networkHandler.sendPacket(new BossBarS2CPacket(BossBarS2CPacket.Type.REMOVE, map.blueTeam));
             player.networkHandler.sendPacket(new BossBarS2CPacket(BossBarS2CPacket.Type.REMOVE, map.redTeam));
         }
-        opened = false;
         scoreboard.close();
         map.close(this);
-        opened = false;
     }
 
     private void onOpen() {
-        opened = true;
         map.spawnVillagers(this);
     }
 

@@ -8,6 +8,7 @@ import io.github.hydos.castlewars.game.map.CastleWarsMap;
 import net.minecraft.network.packet.s2c.play.WorldBorderS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.GameMode;
+import net.minecraft.world.border.WorldBorder;
 import xyz.nucleoid.plasmid.game.GameWorld;
 import xyz.nucleoid.plasmid.game.player.GameTeam;
 import xyz.nucleoid.plasmid.game.player.TeamAllocator;
@@ -24,9 +25,9 @@ public class PlayerManager {
     private static PlayerManager INSTANCE;
     public final Map<ServerPlayerEntity, CastleWarsPlayer> participants = new HashMap<>();
     public final Map<GameTeam, CastleWarsGame.TeamState> teams = new HashMap<>();
-    public List<ServerPlayerEntity> lobbyPlayers = new ArrayList<>();
     final GameWorld gameWorld;
     final CastleWarsMap map;
+    public List<ServerPlayerEntity> lobbyPlayers = new ArrayList<>();
 
     public PlayerManager(GameWorld gameWorld, CastleWarsMap map) {
         INSTANCE = this;
@@ -112,5 +113,17 @@ public class PlayerManager {
             allocator.add(player, config.teams.get(0));//make the allocator pick a team
         }
         return allocator.build();
+    }
+
+    public void removeWorldBorder(CastleWarsConfig config) {
+        for (GameTeam team : config.teams) {
+            List<CastleWarsPlayer> participants = this.getTeamPlayers(team).collect(Collectors.toList());
+            for (CastleWarsPlayer player : participants) {
+                WorldBorder border = teams.get(getPlayersTeam(player)).border;
+                border.setSize(100000);
+                player.player().networkHandler.sendPacket(new WorldBorderS2CPacket(border, WorldBorderS2CPacket.Type.SET_SIZE));
+            }
+        }
+
     }
 }

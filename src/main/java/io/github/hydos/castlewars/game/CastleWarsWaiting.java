@@ -38,19 +38,17 @@ public class CastleWarsWaiting {
     }
 
     public static CompletableFuture<Void> open(MinecraftServer server, CastleWarsConfig config) {
-        PlayerManager.getInstance().participants.clear();
-        PlayerManager.getInstance().teams.clear();
         MapGenerator generator = new MapGenerator(config);
 
         return generator.create().thenAccept(map -> {
             BubbleWorldConfig worldConfig = new BubbleWorldConfig()
-                    .setGenerator(map.asGenerator())
+                    .setGenerator(map.asGenerator(server))
                     .setDefaultGameMode(GameMode.SPECTATOR);
             GameWorld gameWorld = GameWorld.open(server, worldConfig);
 
             CastleWarsWaiting waiting = new CastleWarsWaiting(gameWorld, map, config);
 
-            gameWorld.newGame(game -> {
+            gameWorld.openGame(game -> {
                 game.setRule(GameRule.CRAFTING, RuleResult.ALLOW);
                 game.setRule(GameRule.PORTALS, RuleResult.DENY);
                 game.setRule(GameRule.PVP, RuleResult.DENY);
