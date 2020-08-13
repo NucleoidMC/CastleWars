@@ -1,7 +1,7 @@
 package io.github.hydos.castlewars.game.custom.entities;
 
 import io.github.hydos.castlewars.game.PlayerManager;
-import io.github.hydos.castlewars.game.custom.ItemShop;
+import io.github.hydos.castlewars.game.custom.item.ItemShop;
 import io.github.hydos.castlewars.game.ingame.CastleWarsGame;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.boss.ServerBossBar;

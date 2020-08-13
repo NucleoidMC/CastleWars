@@ -1,4 +1,4 @@
-package io.github.hydos.castlewars.game.custom;
+package io.github.hydos.castlewars.game.custom.item;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;

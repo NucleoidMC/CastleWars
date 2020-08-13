@@ -1,13 +1,14 @@
 package io.github.hydos.castlewars;
 
 import io.github.hydos.castlewars.game.CastleWarsWaiting;
-import io.github.hydos.castlewars.game.block.LaunchPadBlock;
+import io.github.hydos.castlewars.game.custom.block.LaunchPadBlock;
 import io.github.hydos.castlewars.game.config.CastleWarsConfig;
-import io.github.hydos.castlewars.game.custom.FakeBlockItem;
+import io.github.hydos.castlewars.game.custom.block.entity.LaunchPadBlockEntity;
+import io.github.hydos.castlewars.game.custom.item.FakeBlockItem;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Material;
-import net.minecraft.item.BlockItem;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.item.Item;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
@@ -29,10 +30,9 @@ public class CastleWars implements DedicatedServerModInitializer {
 
     public static final boolean DEBUGGING = false;
 
-    public static final LaunchPadBlock LAUNCH_PAD_BLOCK = Registry.register(Registry.BLOCK, new Identifier(ID, "launch_pad_block"), new LaunchPadBlock(AbstractBlock.Settings.of(Material.METAL)));
-    public static final Item LAUNCH_PAD_BLOCK_ITEM = Registry.register(Registry.ITEM, new Identifier(ID, "launch_pad_item"), new FakeBlockItem(LAUNCH_PAD_BLOCK, new Item.Settings()));
-
-//    public static final BlockEntityType<LaunchPadBlockEntity> LAUNCH_PAD_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(ID, "launch_pad_block"), BlockEntityType.Builder.create(LaunchPadBlockEntity::new, LAUNCH_PAD_BLOCK).build(null));
+    public static final LaunchPadBlock LAUNCH_PAD_BLOCK = Registry.register(Registry.BLOCK, new Identifier(ID, "launch_pad"), new LaunchPadBlock(AbstractBlock.Settings.of(Material.METAL)));
+    public static final Item LAUNCH_PAD_BLOCK_ITEM = Registry.register(Registry.ITEM, new Identifier(ID, "launch_pad"), new FakeBlockItem(LAUNCH_PAD_BLOCK, new Item.Settings()));
+    public static final BlockEntityType<LaunchPadBlockEntity> LAUNCH_PAD_BLOCKENTITY =  Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(ID, "launch_pad"), BlockEntityType.Builder.create(LaunchPadBlockEntity::new, LAUNCH_PAD_BLOCK).build(null));
 
     @Override
     public void onInitializeServer() {
