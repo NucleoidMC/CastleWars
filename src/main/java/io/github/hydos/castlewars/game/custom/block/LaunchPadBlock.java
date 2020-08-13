@@ -3,8 +3,10 @@ package io.github.hydos.castlewars.game.custom.block;
 import io.github.hydos.castlewars.game.custom.block.entity.LaunchPadBlockEntity;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.TntEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -16,8 +18,11 @@ import net.minecraft.world.World;
 import xyz.nucleoid.plasmid.fake.FakeBlock;
 
 import javax.annotation.Nullable;
+import java.util.Random;
 
 public class LaunchPadBlock extends BlockWithEntity implements FakeBlock<Block> {
+
+    public static final Random random = new Random();
 
     public LaunchPadBlock(Settings settings) {
         super(settings);
@@ -35,7 +40,7 @@ public class LaunchPadBlock extends BlockWithEntity implements FakeBlock<Block> 
 
     @Override
     public Block getFaking() {
-        return Blocks.REDSTONE_LAMP;
+        return Blocks.SMOOTH_STONE_SLAB;
     }
 
     @Nullable
@@ -50,7 +55,20 @@ public class LaunchPadBlock extends BlockWithEntity implements FakeBlock<Block> 
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        return ActionResult.SUCCESS;
+    public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+        if (random.nextDouble() > 0.5) {
+            //fling the block above the launch pad
+            BlockState block = world.getBlockState(pos.add(0, 1, 0));
+
+            if (block.getBlock() == Blocks.TNT) {
+                boolean blueteam = pos.getX() < 31; //blue should be on that side. this hardcoding kills me
+
+                TntEntity blockEntity = new TntEntity(world, pos.getX(), pos.getY() + 1, pos.getZ(), null);
+                blockEntity.setVelocity(blueteam ? 1.4f : -1.4f, random.nextFloat(), 0);
+
+                world.spawnEntity(blockEntity);
+            }
+        }
+        super.randomTick(state, world, pos, random);
     }
 }
