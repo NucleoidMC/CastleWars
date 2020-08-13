@@ -1,4 +1,4 @@
-package io.github.hydos.castlewars.game.custom.entities;
+package io.github.hydos.castlewars.game.custom.entity;
 
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.decoration.EndCrystalEntity;

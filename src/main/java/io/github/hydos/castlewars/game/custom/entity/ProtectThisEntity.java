@@ -1,4 +1,4 @@
-package io.github.hydos.castlewars.game.custom.entities;
+package io.github.hydos.castlewars.game.custom.entity;
 
 import io.github.hydos.castlewars.game.PlayerManager;
 import io.github.hydos.castlewars.game.custom.item.ItemShop;

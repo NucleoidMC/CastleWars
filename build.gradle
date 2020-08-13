@@ -25,7 +25,7 @@ dependencies {
 	//minigame stuff
 	implementation 'com.google.code.findbugs:jsr305:3.0.1'
 
-	modImplementation('xyz.nucleoid:plasmid:0.1.0+build.64')
+	modImplementation('xyz.nucleoid:plasmid:0.1.0+build.68')
 }
 
 processResources {

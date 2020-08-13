@@ -3,13 +3,12 @@ package io.github.hydos.castlewars.game.ingame;
 import io.github.hydos.castlewars.CastleWars;
 import io.github.hydos.castlewars.game.PlayerManager;
 import io.github.hydos.castlewars.game.config.CastleWarsConfig;
-import io.github.hydos.castlewars.game.custom.entities.ProtectThisEntity;
+import io.github.hydos.castlewars.game.custom.entity.ProtectThisEntity;
 import io.github.hydos.castlewars.game.map.CastleWarsMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.TntEntity;
 import net.minecraft.entity.boss.BossBar;
 import net.minecraft.entity.boss.ServerBossBar;
 import net.minecraft.entity.damage.DamageSource;
@@ -30,7 +29,7 @@ import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.border.WorldBorder;
-import xyz.nucleoid.plasmid.block.CustomBlock;
+import net.minecraft.world.gen.placer.BlockPlacer;
 import xyz.nucleoid.plasmid.game.GameWorld;
 import xyz.nucleoid.plasmid.game.event.*;
 import xyz.nucleoid.plasmid.game.player.GameTeam;
@@ -46,7 +45,6 @@ import java.util.Set;
 public class CastleWarsGame {
 
     private static final Random random = new Random();
-    private static CastleWarsGame INSTANCE = null;
     public final ServerWorld world;
     public final CastleWarsMap map;
     public final CastleWarsConfig config;
@@ -65,13 +63,8 @@ public class CastleWarsGame {
         this.scoreboard = CastleWarsScoreboard.create(this);
     }
 
-    public static CastleWarsGame getInstance(){
-        return INSTANCE;
-    }
-
     public static void open(GameWorld gameWorld, CastleWarsMap map, CastleWarsConfig config) {
         CastleWarsGame active = new CastleWarsGame(gameWorld, map, config);
-        INSTANCE = active;//i hope only 1 game runs at a time
         PlayerManager.getInstance().makePlayersActive(config);
 
         gameWorld.openGame(game -> {
@@ -137,7 +130,6 @@ public class CastleWarsGame {
     private boolean onBreakBlock(ServerPlayerEntity serverPlayerEntity, BlockPos blockPos) {
         BlockState state = world.getBlockState(blockPos);
         Block type = state.getBlock();
-        //TODO: config blacklists
         return type == Blocks.GLASS || type == Blocks.BEDROCK || type == Blocks.BLUE_TERRACOTTA || type == Blocks.RED_TERRACOTTA;
     }
 
@@ -151,7 +143,7 @@ public class CastleWarsGame {
             }
 
             for (ServerPlayerEntity player : PlayerManager.getInstance().participants.keySet()) {
-                player.networkHandler.sendPacket(new TitleS2CPacket(20, 60, 20));
+                player.networkHandler.sendPacket(new TitleS2CPacket(20, 40, 20));
                 player.networkHandler.sendPacket(new TitleS2CPacket(TitleS2CPacket.Action.TITLE, new LiteralText("Kill The Other").formatted(Formatting.YELLOW, Formatting.BOLD)));
                 player.networkHandler.sendPacket(new TitleS2CPacket(TitleS2CPacket.Action.SUBTITLE, new LiteralText("Teams Thing").formatted(Formatting.YELLOW, Formatting.BOLD)));
                 player.setGameMode(GameMode.SURVIVAL);
