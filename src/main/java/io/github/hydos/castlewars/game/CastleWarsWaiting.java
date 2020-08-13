@@ -9,6 +9,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.world.GameMode;
+import xyz.nucleoid.plasmid.game.GameOpenContext;
 import xyz.nucleoid.plasmid.game.GameWorld;
 import xyz.nucleoid.plasmid.game.StartResult;
 import xyz.nucleoid.plasmid.game.event.OfferPlayerListener;
@@ -38,16 +39,16 @@ public class CastleWarsWaiting {
         this.playerManager = new PlayerManager(gameWorld, map);
     }
 
-    public static CompletableFuture<Void> open(MinecraftServer server, CastleWarsConfig config) {
-        MapGenerator generator = new MapGenerator(config);
+    public static CompletableFuture<Void> open(GameOpenContext<CastleWarsConfig> context) {
+        MapGenerator generator = new MapGenerator(context.getConfig());
 
         return generator.create().thenAccept(map -> {
             BubbleWorldConfig worldConfig = new BubbleWorldConfig()
-                    .setGenerator(map.asGenerator(server))
+                    .setGenerator(map.asGenerator(context.getServer()))
                     .setDefaultGameMode(GameMode.SPECTATOR);
-            GameWorld gameWorld = GameWorld.open(server, worldConfig);
+            GameWorld gameWorld = context.openWorld(worldConfig);
 
-            CastleWarsWaiting waiting = new CastleWarsWaiting(gameWorld, map, config);
+            CastleWarsWaiting waiting = new CastleWarsWaiting(gameWorld, map, context.getConfig());
 
             gameWorld.openGame(game -> {
                 game.setRule(GameRule.CRAFTING, RuleResult.ALLOW);
