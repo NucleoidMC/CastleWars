@@ -9,6 +9,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.boss.BossBar;
 import net.minecraft.entity.boss.ServerBossBar;
 import net.minecraft.entity.damage.DamageSource;
@@ -29,7 +30,6 @@ import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.border.WorldBorder;
-import net.minecraft.world.gen.placer.BlockPlacer;
 import xyz.nucleoid.plasmid.game.GameWorld;
 import xyz.nucleoid.plasmid.game.event.*;
 import xyz.nucleoid.plasmid.game.player.GameTeam;
@@ -38,13 +38,11 @@ import xyz.nucleoid.plasmid.game.rule.GameRule;
 import xyz.nucleoid.plasmid.game.rule.RuleResult;
 
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Set;
 
 @SuppressWarnings("SameReturnValue")
 public class CastleWarsGame {
 
-    private static final Random random = new Random();
     public final ServerWorld world;
     public final CastleWarsMap map;
     public final CastleWarsConfig config;
@@ -88,7 +86,19 @@ public class CastleWarsGame {
             game.on(AttackEntityListener.EVENT, active::onAttackEntity);
             game.on(UseBlockListener.EVENT, active::onUseBlock);
             game.on(UseItemListener.EVENT, active::onUseItem);
+            game.on(EntityDeathListener.EVENT, active::onEntityDeath);
         });
+
+
+    }
+
+    private ActionResult onEntityDeath(LivingEntity livingEntity, DamageSource damageSource) {
+        if(killPhase){
+           return ActionResult.FAIL;
+        }
+        else{
+            return ActionResult.PASS;
+        }
     }
 
     private ActionResult onPlayerDeath(ServerPlayerEntity playerEntity, DamageSource damageSource) {
@@ -111,13 +121,16 @@ public class CastleWarsGame {
 
     private ActionResult onUseBlock(ServerPlayerEntity serverPlayerEntity, Hand hand, BlockHitResult blockHitResult) {
         ItemStack item = serverPlayerEntity.getStackInHand(hand);
-        if (item.getItem() == Items.WATER_BUCKET || item.getItem() == Items.NETHERITE_BLOCK || item.getItem() == Items.BEDROCK || item.getItem() == Items.CRYING_OBSIDIAN || item.getItem() == Items.OBSIDIAN) {
+        if (item.getItem() == Items.WATER_BUCKET || item.getItem() == Items.NETHERITE_BLOCK || item.getItem() == Items.BEDROCK || item.getItem() == Items.CRYING_OBSIDIAN || item.getItem() == Items.OBSIDIAN || item.getItem() == Items.ANCIENT_DEBRIS || item.getItem() == Items.RED_TERRACOTTA || item.getItem() == Items.BLUE_TERRACOTTA) {
             return ActionResult.FAIL;
         }
         return ActionResult.PASS;
     }
 
     private ActionResult onAttackEntity(ServerPlayerEntity serverPlayerEntity, Hand hand, Entity entity, EntityHitResult entityHitResult) {
+        if(!killPhase){
+            return ActionResult.FAIL;
+        }
         if (entity instanceof ServerPlayerEntity) {
             ServerPlayerEntity attackedEntity = (ServerPlayerEntity) entity;
             if (PlayerManager.getInstance().getPlayersTeam(attackedEntity) == PlayerManager.getInstance().getPlayersTeam(serverPlayerEntity)) {
@@ -130,7 +143,7 @@ public class CastleWarsGame {
     private boolean onBreakBlock(ServerPlayerEntity serverPlayerEntity, BlockPos blockPos) {
         BlockState state = world.getBlockState(blockPos);
         Block type = state.getBlock();
-        return type == Blocks.GLASS || type == Blocks.BEDROCK || type == Blocks.BLUE_TERRACOTTA || type == Blocks.RED_TERRACOTTA;
+        return type == Blocks.GLASS || type == Blocks.BEDROCK || type == Blocks.BLUE_TERRACOTTA || type == Blocks.RED_TERRACOTTA || type == Blocks.ANCIENT_DEBRIS;
     }
 
     private void tick() {
@@ -148,27 +161,6 @@ public class CastleWarsGame {
                 player.networkHandler.sendPacket(new TitleS2CPacket(TitleS2CPacket.Action.SUBTITLE, new LiteralText("Teams Thing").formatted(Formatting.YELLOW, Formatting.BOLD)));
                 player.setGameMode(GameMode.SURVIVAL);
                 player.playSound(SoundEvents.BLOCK_END_PORTAL_SPAWN, 1, 1);
-            }
-        }
-        if (killPhase) {
-            //Handle custom block logic
-            if (ticks % (20 * 3) == 0) {//20*5 = 5 seconds in ticks
-//                for (BlockPos pos : CustomBlock.allOfType(CustomGameObjects.SUPER_ROCKET_LAUNCH_PAD.getBlock())) {
-//                    //Make this less OP
-//                    if (random.nextDouble() > 0.5) {
-//                        //fling the block above the launch pad
-//                        BlockState block = world.getBlockState(pos.add(0, 1, 0));
-//
-//                        if (block.getBlock() == Blocks.TNT) {
-//                            boolean blueteam = pos.getX() < 31; //blue should be on that side. this hardcoding kills me
-//
-//                            TntEntity blockEntity = new TntEntity(world, pos.getX(), pos.getY() + 1, pos.getZ(), null);
-//                            blockEntity.setVelocity(blueteam ? 1.4f : -1.4f, random.nextFloat(), 0);
-//
-//                            world.spawnEntity(blockEntity);
-//                        }
-//                    }
-//                }
             }
         }
         scoreboard.tick();
