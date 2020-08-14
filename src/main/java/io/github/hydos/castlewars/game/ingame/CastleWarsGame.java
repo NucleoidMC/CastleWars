@@ -194,10 +194,8 @@ public class CastleWarsGame {
 
     private void onClose() {
         closed = true;
-        for (ServerPlayerEntity player : world.getServer().getPlayerManager().getPlayerList()) {
-            player.networkHandler.sendPacket(new BossBarS2CPacket(BossBarS2CPacket.Type.REMOVE, map.blueTeam));
-            player.networkHandler.sendPacket(new BossBarS2CPacket(BossBarS2CPacket.Type.REMOVE, map.redTeam));
-        }
+        map.blueTeam.clearPlayers();
+        map.redTeam.clearPlayers();
         scoreboard.close();
         map.close(this);
     }
