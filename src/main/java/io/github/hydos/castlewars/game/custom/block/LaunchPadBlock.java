@@ -27,25 +27,10 @@ import xyz.nucleoid.plasmid.fake.FakeItem;
 import javax.annotation.Nullable;
 import java.util.Random;
 
-public class LaunchPadBlock extends BlockWithEntity implements FakeBlock<Block> {
+public class LaunchPadBlock extends BlockWithEntity implements FakeBlock {
 
     public LaunchPadBlock(Settings settings) {
         super(settings);
-    }
-
-    @Override
-    public BlockState getFaking(BlockState blockState) {
-        return Blocks.SMOOTH_STONE_SLAB.getDefaultState();
-    }
-
-    @Override
-    public FluidState getFaking(FluidState fluidState) {
-        return null;
-    }
-
-    @Override
-    public Block getFaking() {
-        return Blocks.SMOOTH_STONE_SLAB;
     }
 
     @Nullable
@@ -57,5 +42,15 @@ public class LaunchPadBlock extends BlockWithEntity implements FakeBlock<Block> 
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView view, BlockPos pos, ShapeContext context) {
         return VoxelShapes.cuboid(0f, 0f, 0f, 1f, 0.5f, 1f);
+    }
+
+    @Override
+    public Block asProxy() {
+        return Blocks.SMOOTH_STONE_SLAB;
+    }
+
+    @Override
+    public BlockState asProxy(BlockState blockState) {
+        return Blocks.SMOOTH_STONE_SLAB.getDefaultState();
     }
 }
