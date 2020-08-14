@@ -94,10 +94,10 @@ public class CastleWarsGame {
 
     private ActionResult onEntityDeath(LivingEntity livingEntity, DamageSource damageSource) {
         if(killPhase){
-           return ActionResult.FAIL;
+           return ActionResult.PASS;
         }
         else{
-            return ActionResult.PASS;
+            return ActionResult.FAIL;
         }
     }
 
