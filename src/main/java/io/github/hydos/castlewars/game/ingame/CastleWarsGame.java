@@ -15,7 +15,6 @@ import net.minecraft.entity.boss.ServerBossBar;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.network.packet.s2c.play.BossBarS2CPacket;
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -48,12 +47,12 @@ public class CastleWarsGame {
     public final CastleWarsConfig config;
     public final CastleWarsScoreboard scoreboard;
     public final GameWorld gameWorld;
-    public boolean closed;
+    public boolean gameRunning;
     public boolean killPhase = CastleWars.DEBUGGING;
     public int ticks = 0;
 
     public CastleWarsGame(GameWorld gameWorld, CastleWarsMap map, CastleWarsConfig config) {
-        this.closed = false;
+        this.gameRunning = false;
         this.gameWorld = gameWorld;
         this.world = gameWorld.getWorld();
         this.map = map;
@@ -168,14 +167,15 @@ public class CastleWarsGame {
     }
 
     private void addPlayer(ServerPlayerEntity rawPlayer) {
-        map.blueTeam = new ServerBossBar(new LiteralText("Blue").formatted(Formatting.BLUE, Formatting.BOLD), BossBar.Color.BLUE, BossBar.Style.NOTCHED_20);
-        map.redTeam = new ServerBossBar(new LiteralText("Red").formatted(Formatting.RED, Formatting.BOLD), BossBar.Color.RED, BossBar.Style.NOTCHED_20);
-
-        rawPlayer.networkHandler.sendPacket(new BossBarS2CPacket(BossBarS2CPacket.Type.ADD, map.blueTeam));
-        rawPlayer.networkHandler.sendPacket(new BossBarS2CPacket(BossBarS2CPacket.Type.ADD, map.redTeam));
+        if(map.redTeam == null){ //assume if red is null blue is null
+            map.blueTeam = new ServerBossBar(new LiteralText("Blue").formatted(Formatting.BLUE, Formatting.BOLD), BossBar.Color.BLUE, BossBar.Style.NOTCHED_20);
+            map.redTeam = new ServerBossBar(new LiteralText("Red").formatted(Formatting.RED, Formatting.BOLD), BossBar.Color.RED, BossBar.Style.NOTCHED_20);
+        }
+        map.blueTeam.addPlayer(rawPlayer);
+        map.redTeam.addPlayer(rawPlayer);
 
         CastleWarsPlayer player = PlayerManager.getInstance().participants.get(rawPlayer);
-        if (PlayerManager.getInstance().isParticipant(rawPlayer)) {
+        if (PlayerManager.getInstance().isParticipant(rawPlayer) && !gameRunning) {
             if (player.team.getDisplay().equals("Blue")) {
                 map.spawnPlayerTeamBlue(rawPlayer, world);
             }
@@ -193,7 +193,7 @@ public class CastleWarsGame {
     }
 
     private void onClose() {
-        closed = true;
+        gameRunning = true;
         map.blueTeam.clearPlayers();
         map.redTeam.clearPlayers();
         scoreboard.close();

@@ -58,7 +58,7 @@ public class ProtectThisEntity extends VillagerEntity {
 
     @Override
     public void tick() {
-        if (game.closed) {
+        if (game.gameRunning) {
             kill();
         }
         if (game.killPhase) {
@@ -75,7 +75,7 @@ public class ProtectThisEntity extends VillagerEntity {
 
     @Override
     public void onDeath(DamageSource source) {
-        if (game.closed) {
+        if (game.gameRunning) {
             super.onDeath(source);
             return;
         }
