@@ -29,7 +29,7 @@ import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.border.WorldBorder;
-import xyz.nucleoid.plasmid.game.GameWorld;
+import xyz.nucleoid.plasmid.game.GameSpace;
 import xyz.nucleoid.plasmid.game.event.*;
 import xyz.nucleoid.plasmid.game.player.GameTeam;
 import xyz.nucleoid.plasmid.game.player.JoinResult;
@@ -46,12 +46,12 @@ public class CastleWarsGame {
     public final CastleWarsMap map;
     public final CastleWarsConfig config;
     public final CastleWarsScoreboard scoreboard;
-    public final GameWorld gameWorld;
+    public final GameSpace gameWorld;
     public boolean gameRunning;
     public boolean killPhase = CastleWars.DEBUGGING;
     public int ticks = 0;
 
-    public CastleWarsGame(GameWorld gameWorld, CastleWarsMap map, CastleWarsConfig config) {
+    public CastleWarsGame(GameSpace gameWorld, CastleWarsMap map, CastleWarsConfig config) {
         this.gameRunning = false;
         this.gameWorld = gameWorld;
         this.world = gameWorld.getWorld();
@@ -60,7 +60,7 @@ public class CastleWarsGame {
         this.scoreboard = CastleWarsScoreboard.create(this);
     }
 
-    public static void open(GameWorld gameWorld, CastleWarsMap map, CastleWarsConfig config) {
+    public static void open(GameSpace gameWorld, CastleWarsMap map, CastleWarsConfig config) {
         CastleWarsGame active = new CastleWarsGame(gameWorld, map, config);
         PlayerManager.getInstance().makePlayersActive(config);
 
@@ -139,10 +139,14 @@ public class CastleWarsGame {
         return ActionResult.PASS;
     }
 
-    private boolean onBreakBlock(ServerPlayerEntity serverPlayerEntity, BlockPos blockPos) {
+    private ActionResult onBreakBlock(ServerPlayerEntity serverPlayerEntity, BlockPos blockPos) {
         BlockState state = world.getBlockState(blockPos);
         Block type = state.getBlock();
-        return type == Blocks.GLASS || type == Blocks.BEDROCK || type == Blocks.BLUE_TERRACOTTA || type == Blocks.RED_TERRACOTTA || type == Blocks.ANCIENT_DEBRIS;
+        if(type == Blocks.GLASS || type == Blocks.BEDROCK || type == Blocks.BLUE_TERRACOTTA || type == Blocks.RED_TERRACOTTA || type == Blocks.ANCIENT_DEBRIS){
+            return ActionResult.FAIL;
+        }else {
+            return ActionResult.PASS;
+        }
     }
 
     private void tick() {

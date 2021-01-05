@@ -5,12 +5,13 @@ import io.github.hydos.castlewars.game.ingame.CastleWarsGame;
 import io.github.hydos.castlewars.game.map.CastleWarsMap;
 import io.github.hydos.castlewars.game.map.MapGenerator;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.world.GameMode;
+import xyz.nucleoid.fantasy.BubbleWorldConfig;
 import xyz.nucleoid.plasmid.game.GameOpenContext;
-import xyz.nucleoid.plasmid.game.GameWorld;
+import xyz.nucleoid.plasmid.game.GameOpenProcedure;
+import xyz.nucleoid.plasmid.game.GameSpace;
 import xyz.nucleoid.plasmid.game.StartResult;
 import xyz.nucleoid.plasmid.game.event.OfferPlayerListener;
 import xyz.nucleoid.plasmid.game.event.PlayerAddListener;
@@ -19,19 +20,16 @@ import xyz.nucleoid.plasmid.game.event.RequestStartListener;
 import xyz.nucleoid.plasmid.game.player.JoinResult;
 import xyz.nucleoid.plasmid.game.rule.GameRule;
 import xyz.nucleoid.plasmid.game.rule.RuleResult;
-import xyz.nucleoid.plasmid.game.world.bubble.BubbleWorldConfig;
-
-import java.util.concurrent.CompletableFuture;
 
 public class CastleWarsWaiting {
 
-    private final GameWorld gameWorld;
+    private final GameSpace gameWorld;
     private final CastleWarsMap map;
     private final CastleWarsConfig config;
 
     private final PlayerManager playerManager;
 
-    private CastleWarsWaiting(GameWorld gameWorld, CastleWarsMap map, CastleWarsConfig config) {
+    private CastleWarsWaiting(GameSpace gameWorld, CastleWarsMap map, CastleWarsConfig config) {
         this.gameWorld = gameWorld;
         this.map = map;
         this.config = config;
@@ -39,30 +37,28 @@ public class CastleWarsWaiting {
         this.playerManager = new PlayerManager(gameWorld, map);
     }
 
-    public static CompletableFuture<Void> open(GameOpenContext<CastleWarsConfig> context) {
+    public static GameOpenProcedure open(GameOpenContext<CastleWarsConfig> context) {
         MapGenerator generator = new MapGenerator(context.getConfig());
+        CastleWarsMap map = generator.build();
 
-        return generator.create().thenAccept(map -> {
-            BubbleWorldConfig worldConfig = new BubbleWorldConfig()
-                    .setGenerator(map.asGenerator(context.getServer()))
-                    .setDefaultGameMode(GameMode.SPECTATOR);
-            GameWorld gameWorld = context.openWorld(worldConfig);
+        BubbleWorldConfig worldConfig = new BubbleWorldConfig()
+                .setGenerator(map.asGenerator(context.getServer()))
+                .setDefaultGameMode(GameMode.ADVENTURE);
 
-            CastleWarsWaiting waiting = new CastleWarsWaiting(gameWorld, map, context.getConfig());
+        return context.createOpenProcedure(worldConfig, game -> {
+            CastleWarsWaiting waiting = new CastleWarsWaiting(game.getSpace(), map, context.getConfig());
 
-            gameWorld.openGame(game -> {
-                game.setRule(GameRule.CRAFTING, RuleResult.ALLOW);
-                game.setRule(GameRule.PORTALS, RuleResult.DENY);
-                game.setRule(GameRule.PVP, RuleResult.DENY);
-                game.setRule(GameRule.FALL_DAMAGE, RuleResult.DENY);
-                game.setRule(GameRule.HUNGER, RuleResult.DENY);
+            game.setRule(GameRule.CRAFTING, RuleResult.ALLOW);
+            game.setRule(GameRule.PORTALS, RuleResult.DENY);
+            game.setRule(GameRule.PVP, RuleResult.DENY);
+            game.setRule(GameRule.FALL_DAMAGE, RuleResult.DENY);
+            game.setRule(GameRule.HUNGER, RuleResult.DENY);
 
-                game.on(RequestStartListener.EVENT, waiting::requestStart);
-                game.on(OfferPlayerListener.EVENT, waiting::offerPlayer);
+            game.on(RequestStartListener.EVENT, waiting::requestStart);
+            game.on(OfferPlayerListener.EVENT, waiting::offerPlayer);
 
-                game.on(PlayerAddListener.EVENT, waiting::addPlayer);
-                game.on(PlayerDeathListener.EVENT, waiting::onPlayerDeath);
-            });
+            game.on(PlayerAddListener.EVENT, waiting::addPlayer);
+            game.on(PlayerDeathListener.EVENT, waiting::onPlayerDeath);
         });
     }
 
@@ -76,10 +72,10 @@ public class CastleWarsWaiting {
 
     private StartResult requestStart() {
         if (this.gameWorld.getPlayerCount() < this.config.players.getMinPlayers()) {
-            return StartResult.notEnoughPlayers();
+            return StartResult.NOT_ENOUGH_PLAYERS;
         }
         CastleWarsGame.open(this.gameWorld, this.map, this.config);
-        return StartResult.ok();
+        return StartResult.OK;
     }
 
     private void addPlayer(ServerPlayerEntity player) {

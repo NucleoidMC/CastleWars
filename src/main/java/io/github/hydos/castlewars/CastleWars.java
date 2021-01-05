@@ -20,7 +20,7 @@ import xyz.nucleoid.plasmid.game.GameType;
 
 public class CastleWars implements DedicatedServerModInitializer {
 
-    public static final String ID = "castlewars";
+    public static final String ID = "castle_wars";
     public static final Logger LOGGER = LogManager.getLogger(ID);
 
     public static final boolean DEBUGGING = false;

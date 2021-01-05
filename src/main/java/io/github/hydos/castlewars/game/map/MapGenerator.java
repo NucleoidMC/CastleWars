@@ -3,11 +3,8 @@ package io.github.hydos.castlewars.game.map;
 import io.github.hydos.castlewars.game.config.CastleWarsConfig;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
-import xyz.nucleoid.plasmid.game.map.template.MapTemplate;
-
-import java.util.concurrent.CompletableFuture;
+import xyz.nucleoid.plasmid.map.template.MapTemplate;
 
 @SuppressWarnings("SameParameterValue")
 public class MapGenerator {
@@ -18,11 +15,7 @@ public class MapGenerator {
         this.config = config;
     }
 
-    public CompletableFuture<CastleWarsMap> create() {
-        return CompletableFuture.supplyAsync(this::build, Util.getMainWorkerExecutor());
-    }
-
-    private CastleWarsMap build() {
+    public CastleWarsMap build() {
         MapTemplate template = MapTemplate.createEmpty();
         CastleWarsMap map = new CastleWarsMap(template);
 

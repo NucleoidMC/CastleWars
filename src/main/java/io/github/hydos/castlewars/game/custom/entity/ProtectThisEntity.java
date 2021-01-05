@@ -17,9 +17,10 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
-import xyz.nucleoid.plasmid.game.GameWorld;
+import xyz.nucleoid.plasmid.game.GameSpace;
 import xyz.nucleoid.plasmid.game.player.GameTeam;
 
+@SuppressWarnings("EntityConstructor")
 public class ProtectThisEntity extends VillagerEntity {
 
     public final GameTeam team;
@@ -37,7 +38,7 @@ public class ProtectThisEntity extends VillagerEntity {
         this.setCustomNameVisible(true);
     }
 
-    public static void checkForGameEnd(GameWorld gameWorld) {
+    public static void checkForGameEnd(GameSpace gameWorld) {
         if (PlayerManager.getInstance().teams().filter(teamState -> !teamState.eliminated).toArray().length != PlayerManager.getInstance().teams.size()) {
             //someone has been eliminated. figure out who hasnt
             PlayerManager.getInstance().teams().filter(teamState -> !teamState.eliminated).forEach(teamState -> {

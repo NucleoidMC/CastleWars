@@ -20,9 +20,9 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
-import xyz.nucleoid.plasmid.game.map.template.MapTemplate;
-import xyz.nucleoid.plasmid.game.map.template.TemplateChunkGenerator;
 import xyz.nucleoid.plasmid.game.player.GameTeam;
+import xyz.nucleoid.plasmid.map.template.MapTemplate;
+import xyz.nucleoid.plasmid.map.template.TemplateChunkGenerator;
 import xyz.nucleoid.plasmid.util.BlockBounds;
 
 public class CastleWarsMap {
@@ -47,21 +47,21 @@ public class CastleWarsMap {
     }
 
     public ChunkGenerator asGenerator(MinecraftServer server) {
-        return new TemplateChunkGenerator(server, this.template, BlockPos.ORIGIN);
+        return new TemplateChunkGenerator(server, this.template);
     }
 
     public void spawnPlayerIntoLobby(ServerPlayerEntity player, ServerWorld world) {
-        world.getChunkManager().addTicket(ChunkTicketType.field_19347, new ChunkPos(defaultSpawn), 4, player.getEntityId());
+        world.getChunkManager().addTicket(ChunkTicketType.POST_TELEPORT, new ChunkPos(defaultSpawn), 4, player.getEntityId());
         player.teleport(world, defaultSpawn.getX(), defaultSpawn.getY(), defaultSpawn.getZ(), 0, 0);
     }
 
     public void spawnPlayerTeamRed(ServerPlayerEntity player, ServerWorld world) {
-        world.getChunkManager().addTicket(ChunkTicketType.field_19347, new ChunkPos(redTeamSpawn), 4, player.getEntityId());
+        world.getChunkManager().addTicket(ChunkTicketType.POST_TELEPORT, new ChunkPos(redTeamSpawn), 4, player.getEntityId());
         player.teleport(world, redTeamSpawn.getX(), redTeamSpawn.getY(), redTeamSpawn.getZ(), 0, 0);
     }
 
     public void spawnPlayerTeamBlue(ServerPlayerEntity player, ServerWorld world) {
-        world.getChunkManager().addTicket(ChunkTicketType.field_19347, new ChunkPos(blueTeamSpawn), 4, player.getEntityId());
+        world.getChunkManager().addTicket(ChunkTicketType.POST_TELEPORT, new ChunkPos(blueTeamSpawn), 4, player.getEntityId());
         player.teleport(world, blueTeamSpawn.getX(), blueTeamSpawn.getY(), blueTeamSpawn.getZ(), 0, 0);
     }
 

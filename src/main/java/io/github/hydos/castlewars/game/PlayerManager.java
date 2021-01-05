@@ -9,7 +9,7 @@ import net.minecraft.network.packet.s2c.play.WorldBorderS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.border.WorldBorder;
-import xyz.nucleoid.plasmid.game.GameWorld;
+import xyz.nucleoid.plasmid.game.GameSpace;
 import xyz.nucleoid.plasmid.game.player.GameTeam;
 import xyz.nucleoid.plasmid.game.player.TeamAllocator;
 
@@ -25,11 +25,11 @@ public class PlayerManager {
     private static PlayerManager INSTANCE;
     public final Map<ServerPlayerEntity, CastleWarsPlayer> participants = new HashMap<>();
     public final Map<GameTeam, CastleWarsGame.TeamState> teams = new HashMap<>();
-    final GameWorld gameWorld;
+    final GameSpace gameWorld;
     final CastleWarsMap map;
     public List<ServerPlayerEntity> lobbyPlayers = new ArrayList<>();
 
-    public PlayerManager(GameWorld gameWorld, CastleWarsMap map) {
+    public PlayerManager(GameSpace gameWorld, CastleWarsMap map) {
         INSTANCE = this;
         this.gameWorld = gameWorld;
         this.map = map;
