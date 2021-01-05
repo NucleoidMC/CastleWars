@@ -32,7 +32,7 @@ public class CastleWars implements DedicatedServerModInitializer {
     @Override
     public void onInitializeServer() {
         GameType.register(
-                new Identifier(CastleWars.ID, ID),
+                new Identifier(CastleWars.ID, CastleWars.ID),
                 CastleWarsWaiting::open,
                 CastleWarsConfig.CODEC
         );

@@ -32,7 +32,7 @@ public class CastleWarsScoreboard {
 
         ScoreboardObjective objective = new ScoreboardObjective(
                 scoreboard,
-                "castlewars",
+                "castle_wars",
                 ScoreboardCriterion.DUMMY,
                 new LiteralText("Castle Wars").formatted(Formatting.AQUA, Formatting.BOLD),
                 ScoreboardCriterion.RenderType.INTEGER

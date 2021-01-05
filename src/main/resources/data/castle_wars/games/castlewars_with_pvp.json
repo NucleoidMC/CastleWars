@@ -1,5 +1,5 @@
 {
-  "type": "castlewars:castlewars",
+  "type": "castle_wars:castle_wars",
   "bridges": true,
   "map": {
     "platformSize": 30
