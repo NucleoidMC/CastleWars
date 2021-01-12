@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:water",
+    "minecraft:lava",
+    "minecraft:ice",
+    "minecraft:obsidian",
+    "minecraft:bedrock",
+    "minecraft:soul_sand",
+    "minecraft:beacon",
+    "minecraft:enchantment_table",
+    "minecraft:crying_obsidian",
+    "minecraft:netherite_block",
+    "minecraft:anvil",
+    "minecraft:ancient_debris"
+  ]
+}
