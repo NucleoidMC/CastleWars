@@ -10,4 +10,7 @@ public class Tags {
 
 	public static final Tag<Block> BLACKLISTED_BLOCKS = TagRegistry.block(CastleWars.id("blacklist"));
 	public static final Tag<Item> BLACKLISTED_ITEMS = TagRegistry.item(CastleWars.id("blacklist"));
+
+	public static void initialize() {
+	}
 }

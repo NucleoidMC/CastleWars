@@ -4,6 +4,7 @@ import me.hydos.castlewars.game.waiting.CastleWarsWaiting;
 import me.hydos.castlewars.game.core.config.CastleWarsConfig;
 import me.hydos.castlewars.block.LaunchPadBlock;
 import me.hydos.castlewars.block.entity.LaunchPadBlockEntity;
+import me.hydos.castlewars.tag.Tags;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Blocks;
@@ -35,6 +36,7 @@ public class CastleWars implements DedicatedServerModInitializer {
 
     @Override
     public void onInitializeServer() {
+        Tags.initialize();
         GameType.register(
                 id(ID),
                 CastleWarsWaiting::open,

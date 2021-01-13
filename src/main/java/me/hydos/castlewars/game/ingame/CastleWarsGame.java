@@ -115,7 +115,7 @@ public class CastleWarsGame {
 
     private TypedActionResult<ItemStack> onUseItem(ServerPlayerEntity player, Hand hand) {
         ItemStack item = player.getStackInHand(hand);
-        if (item.getItem() == Items.WATER_BUCKET) {
+        if (isIllegal(item) == ActionResult.FAIL) {
             return TypedActionResult.fail(ItemStack.EMPTY);
         }
         return TypedActionResult.pass(ItemStack.EMPTY);
@@ -129,7 +129,7 @@ public class CastleWarsGame {
         if(item.getItem().isIn(Tags.BLACKLISTED_ITEMS)) {
             return ActionResult.FAIL;
         } else {
-            return ActionResult.SUCCESS;
+            return ActionResult.PASS;
         }
     }
 
@@ -137,7 +137,7 @@ public class CastleWarsGame {
         if(block.isIn(Tags.BLACKLISTED_BLOCKS)) {
             return ActionResult.FAIL;
         } else {
-            return ActionResult.SUCCESS;
+            return ActionResult.PASS;
         }
     }
 
@@ -156,12 +156,7 @@ public class CastleWarsGame {
 
     private ActionResult onBreakBlock(ServerPlayerEntity serverPlayerEntity, BlockPos blockPos) {
         BlockState state = world.getBlockState(blockPos);
-        Block type = state.getBlock();
-        if(type == Blocks.GLASS || type == Blocks.BEDROCK || type == Blocks.BLUE_TERRACOTTA || type == Blocks.RED_TERRACOTTA || type == Blocks.ANCIENT_DEBRIS){
-            return ActionResult.FAIL;
-        }else {
-            return ActionResult.PASS;
-        }
+        return isIllegal(state.getBlock());
     }
 
     private void tick() {
