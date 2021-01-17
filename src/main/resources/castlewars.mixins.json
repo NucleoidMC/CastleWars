@@ -4,6 +4,7 @@
   "package": "me.hydos.castlewars.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "ServerPlayNetworkHandlerMixin"
   ],
   "client": [
   ],
