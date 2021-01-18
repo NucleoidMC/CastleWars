@@ -13,7 +13,7 @@ public class ServerPlayNetworkHandlerMixin {
 	@Inject(method = "disconnect", at = @At("HEAD"), cancellable = true)
 	private void fuckOffYouStupidFuckingFlyCheck(Text reason, CallbackInfo ci) {
 		if(reason.getString().equals("Flying is not enabled on this server")) {
-			ci.cancel();
+			//ci.cancel();
 			//Fuck you mojang
 		}
 	}
